@@ -1,0 +1,538 @@
+/* registration.css – стили для экранов регистрации */
+
+@font-face {
+  font-family: 'Gilroy-ExtraBold';
+  src: url('../fonts/Gilroy-ExtraBold.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gilroy-Light';
+  src: url('../fonts/Gilroy-Light.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Управление видимостью экранов */
+.screen {
+    display: none;
+}
+.screen.active {
+    display: block;
+}
+
+body {
+    background-color: #ffffff;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    padding: 20px;
+    line-height: 1.4;
+    overflow: hidden;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+.main-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding-top: 100px;
+}
+
+/* Общие стили для всех экранов (без display: block) */
+.registration-screen,
+.registration-screen-geolocation,
+.registration-screen-terms-of-use,
+.registration-screen-photo,
+.registration-screen-moderation-failed,
+.registration-screen-description-of-profile,
+.registration-screen-tags,
+.registration-screen-result,
+.registration-screen-test {
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    font-size: 16px;
+    color: #383436;
+}
+
+/* Поля ввода и кнопки */
+input, button {
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    font-size: 16px;
+    font-family: inherit;
+}
+
+input:focus {
+    outline: none;
+    border-color: #383436;
+}
+
+button {
+    background-color: #383436;
+    color: white;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 40px;
+}
+
+button:active {
+    opacity: 0.8;
+}
+
+/* Чекбоксы */
+input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+}
+
+label {
+    display: inline-block;
+    margin: 8px 0;
+}
+
+/* Иконки */
+img {
+    vertical-align: middle;
+    margin: 0 4px;
+}
+
+/* Область загрузки фото */
+.upload-area {
+    background-color: #eaeaea;
+    border: 2px dashed #aaa;
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    margin: 12px 0;
+}
+
+/* Превью фото */
+.profile-photo-container {
+    margin: 12px 0;
+}
+.profile-photo {
+    max-width: 150px;
+}
+
+/* Логотип */
+.splash-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.polydate {
+    width: 80px;
+    height: auto;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+}
+.text-title {
+    font-family: 'Gilroy-ExtraBold', system-ui, sans-serif;
+    font-size: 35px;
+    font-weight: bold;
+    line-height: 1.2;
+    color: #F84CAA;
+    text-align: center;
+}
+.fields-group {
+    background-color: white;
+    border: 3px solid white;
+    border-radius: 30px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px; 
+    padding-top: 100px; 
+    margin-top: 30px;
+}
+
+.field-input {
+    border: 3px solid #ccc;
+    border-radius: 40px;
+    padding: 12px;
+}
+/* Блок выбора пола */
+.gender-selector {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    margin-top: 16px;
+}
+.gender-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    gap: 8px;
+}
+.gender-circle {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 2px solid #cccccc;      /* серый контур */
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+.gender-icon {
+    width: 35px;
+    height: auto;
+    transition: filter 0.2s ease;
+}
+
+.gender-option.active .gender-circle {
+    background-color: #ff69b4;       /* розовый фон */
+    border-color: #ff69b4;
+}
+.gender-option.active .gender-icon {
+    filter: brightness(0) invert(1); /* делает иконку белой */
+}
+.gender-option span {
+    font-size: 14px;
+    color: #383436;
+}
+.gender-option.active span {
+    color: #ff69b4;
+    font-weight: 500;
+}
+.next-btn {
+    margin-top:30px;
+}
+
+/* next-screen*/
+/* Основной контейнер экрана */
+.registration-screen-geolocation {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    height: 100vh; /* Чтобы кнопка была внизу, если нужно */
+    position: relative;
+}
+
+
+/* Контейнер для заголовка и сердец */
+.title-container {
+    position: relative; /* База для абсолютных сердец */
+    margin-bottom: 30px;
+}
+
+/* Розовая плашка заголовка */
+.text-title-frame {
+    background-color: #ff69b4; /* Подбери точный цвет по макету */
+    color: white;
+    padding: 15px 40px;
+    border-radius: 25px;
+    font-size: 24px;
+    line-height: 1.2;
+    margin: 0;
+    display: inline-block; /* Чтобы фон облегал текст */
+}
+
+/* Общий стиль для сердец */
+.heart {
+    position: absolute;
+    z-index: 1; /* Чтобы были поверх фона */
+}
+
+/* Позиционируем левое сердце */
+
+.heart-left {
+    left: 5%;    /* 10% от ширины контейнера влево */
+    top: -65%;     /* 15% от высоты контейнера вверх */
+}
+
+/* Позиционируем правое сердце */
+.heart-right {
+    right: -20px; 
+    bottom: -25px; /* Спускаем чуть ниже края */
+}
+
+/* Текст описания */
+.main-text {
+    font-size: 18px;
+    color: #383436;
+    max-width: 280px;       /* или нужная ширина */
+    width: 100%;            /* чтобы занимал всю доступную ширину */
+    text-align: center;     /* центрирует текст внутри блока */
+    margin-left: auto;      /* эти два свойства */
+    margin-right: auto;     /* центрируют сам блок, если он уже имеет max-width */
+    margin-bottom: 120px;
+}
+
+.field-input::placeholder {
+    font-family: 'Gilroy-ExtraBold', system-ui, sans-serif;
+    font-size: 18px;
+    color: #DCDCDC;
+}
+/* экран принятия условий пользования*/
+
+.registration-screen-terms-of-use.screen.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;  /* элементы идут сверху */
+    text-align: center;
+    padding: 20px;
+    height: 100vh;
+    box-sizing: border-box;
+}
+
+/* Иконка документа (аналог .geo-icon) */
+.terms-icon {
+    width: 166px;          /* подберите нужный размер */
+    height: 187px;
+    margin-top: -70px;      /* отступ сверху, как у geo-icon */
+    margin-bottom: 70px;
+}
+
+/* Контейнер заголовка уже стилизован через .title-container,
+   поэтому дополнительные правки не нужны */
+
+/* Чекбоксы – центрируем текст и добавляем отступы */
+.checkbox-container {
+    width: 100%;
+    max-width: 320px;
+    margin-top: 30px;      /* отступ после заголовка */
+    margin-bottom: 20px;
+    text-align: left;      /* текст чекбоксов выравниваем влево */
+}
+
+/* Кнопка внизу */
+.registration-screen-terms-of-use .next-btn {
+    margin-top: 40px;      /* прижимает к низу */
+      /* небольшой отступ снизу */
+    max-width: 300px;
+}
+
+/* Контейнер чекбоксов */
+.checkbox-container {
+    width: 100%;
+    max-width: 320px;
+    margin-top: 20px;
+    text-align: left; /* Текст чекбоксов по левому краю */
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: flex-start; /* Чтобы квадратик был на уровне первой строки */
+    margin-bottom: 25px;
+}
+
+/* Стилизация чекбокса (розовый квадратик) */
+.custom-checkbox {
+    appearance: none; /* Скрываем стандартный вид */
+    min-width: 24px;
+    height: 24px;
+    background-color: #ff69b4; /* Твой розовый цвет */
+    border-radius: 4px;
+    margin-right: 15px;
+    cursor: pointer;
+    position: relative;
+}
+
+/* Галочка при нажатии (опционально) */
+.custom-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    color: white;
+    font-size: 18px;
+    left: 4px;
+    top: -2px;
+}
+
+.checkbox-group label {
+    font-size: 14px;
+    color: #383436;
+    line-height: 1.4;
+    cursor: pointer;
+}
+/* Корректировка сердец на экране условий */
+.registration-screen-terms-of-use .heart-left {
+    left: -35px;      /* двигайте влево/вправо */
+    top: -60px;       /* двигайте вверх/вниз */
+}
+
+.registration-screen-terms-of-use .heart-right {
+    right: -80px;     /* двигайте влево/вправо */
+    bottom: -30px;    /* двигайте вверх/вниз */
+}
+
+/* Новый экран - загружаем видос*/
+.registration-screen-moderation-failed .moderation-list {
+    background-color: #FFF2F9;   /* розовый фон */
+    color: #383436;                /* белый текст для контраста */
+    padding: 30px 25px;          /* внутренние отступы */
+    border-radius: 20px;         /* скругление углов */
+    width: 110%;
+    margin: 30px 0;
+    box-sizing: border-box; 
+    align-self: center;
+}
+.registration-screen-photo .main-text {
+    text-align: center;
+    margin-bottom: 25%;
+}
+.upload-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;      /* центрирование по горизонтали внутри */
+    justify-content: center;  /* центрирование по вертикали внутри */
+    text-align: center;
+    margin-left: auto;        /* центрирование самого блока по горизонтали */
+    margin-right: auto;
+    width: 100%;
+    max-width: 400px;         /* или нужная ширина */
+    padding: 110px 40px;
+    box-sizing: border-box;
+    background-color:#FFFFFF;
+}
+
+/* модерация не пойдена*/
+.panel {
+  border-radius:clamp(35px,4vw,50px) clamp(35px,4vw,50px) 0 0;
+  padding: clamp(50px, 5vw, 70px);
+  background-color:#FFFFFF;
+  border:1px solid var(--glass-border);
+  backdrop-filter:blur(10px) saturate(120%);
+  -webkit-backdrop-filter:blur(10px) saturate(120%);
+  box-shadow: inset 0 4px 0 rgba(255, 165, 246, 0.471), 0 8px 60px rgba(216, 132, 162, 0.35);  display:flex;
+  flex-direction:column;
+  gap:0px;
+  width:100%;
+  flex-grow:1;
+  justify-content:flex-end;
+
+}
+.moderation-list {
+    list-style: none;
+}
+.profile-photo {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/*описание профиля - новый экран*/
+/* Розовые рамки для полей ввода */
+.registration-screen-description-of-profile input {
+    border-radius: 16px;
+    padding: 12px 16px;
+    background-color: #FFF2F9 ;
+    margin-bottom: 16px;
+    border: none;
+}
+
+/* Убираем отступ после "Расскажи о себе:" */
+.registration-screen-description-of-profile .main-text {
+    margin-bottom: 0;      /* убираем отступ снизу */
+    padding-bottom: 0;
+}
+
+/* Дополнительно: если нужно убрать отступ у родительского контейнера */
+.registration-screen-description-of-profile .profile-photo-container {
+    margin-bottom: 0;
+}
+#description {
+    width: 100%; 
+    height: 200px;               /* или 400px, 90% и т.д. */
+    border: none;  /* розовая рамка */
+    border-radius: 12px;
+    padding: 12px 16px;
+    box-sizing: border-box;
+}
+
+/* Новый экран с тегами*/
+/* Экран тегов — скролл только для этого экрана */
+/* Экран тегов — прокрутка */
+.registration-screen-tags {
+    overflow-y: auto;
+    height: 100vh;
+    padding-bottom: 20px;
+}
+
+/* Сетка тегов */
+.tags-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+/* Стиль тега */
+.tag-item {
+    border: none;
+    border-radius: 30px;
+    padding: 10px 12px;
+    text-align: center;
+    font-size: 18px;
+    color: #383436;
+    background-color:#FFF2F9;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Убираем нежелательный hover */
+.tag-item:hover {
+    background-color: transparent;
+}
+
+/* Активный тег — розовый фон, белый текст */
+.tag-item.active,
+.tag-item.active:hover {
+    background-color: #ff69b4;
+    color: white;
+    border-color: none;
+}
+.registration-screen-tags .main-text {
+    margin-bottom: 0%;
+}
+.registration-screen-tags .next-btn {
+    margin-top: 0%;
+}
+.registration-screen-tags {
+    overflow-y: auto;
+    height: 100vh;
+    padding-bottom: 80px;   /* увеличивает прокрутку вниз */
+}
+
+.registration-screen-tags .panel {
+    padding-bottom: 60px;    /* дополнительный отступ внутри панели */
+}
+/* новый экран с тестом*/
+.test-photo {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: fit-content;   /* или задайте конкретную ширину, например 150px */
+}
+.registration-screen-test .main-text {
+    max-width: 100%;          /* растягиваем по ширине экрана */
+    margin: 20px auto;       /* центрируем сам блок */
+    font-size: 18px;         /* подберите размер */
+    line-height: 1.4;
+    text-align: center;      /* чтобы текст был по центру */
+    word-break: normal;      /* обычный перенос слов */
+    margin-top: 20px;
+
+}
+

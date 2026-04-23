@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Лента анкет</title>
+    <link rel="stylesheet" href="recommendations.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+</head>
+<body>
+    <div class="main-container">
+        <div class="user-info">
+            <img src="filters.svg" alt="иконка фильтров" style="width: 24px; height: 24px; vertical-align: middle;">
+            Фильтры
+        </div>
+        <div id="splash" class="splash-container">
+            <img class="logo" src="src/assets/logo.svg" alt="Логотип приложения">
+        </div>
+        <!-- Карточка анкеты (пока пустая) -->
+        <div class="card-area" id="cardArea">
+            Здесь будет карточка пользователя
+        </div>
+
+        <!-- Основные кнопки управления -->
+        <div class="action-buttons">
+            <button id="dislikeBtn">Дизлайк</button>
+            <button id="likeBtn">Лайк</button>
+            <button id="infoBtn">Полная анкета</button>
+            <button id="backBtn">Назад</button>
+        </div>
+        <div class="compatibility-percentage">
+            90%
+        </div>
+        <!-- Место для фильтров -->
+        <div class="filters">
+            <span class="filter-tag">Фильтр: возраст</span>
+            <span class="filter-tag">Фильтр: расстояние</span>
+            <span class="filter-tag">Фильтр: интересы</span>
+            <button id="openFiltersBtn" style="background:none; border:none; color: var(--tg-theme-button-color);">✏️ Настроить</button>
+        </div>
+    </div>
+
+</body>
+</html>

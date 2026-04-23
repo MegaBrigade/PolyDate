@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Регистрация PolyDate</title>
+    <link rel="stylesheet" href="css/registration.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <div id="splash" class="splash-container">
+            <img class="polydate" src="src/assets/polydate.svg" alt="Логотип приложения">
+        </div>
+
+        <div class="registration-screen screen">
+            <h2 class="text-title">Добро пожаловать в PolyDate!</h2>
+            <div class="fields-group">
+                <input type="text" placeholder="Имя" class="field-input">
+                <input type="text" placeholder="Дата рождения" class="field-input" pattern="\d{2}\.\d{2}\.\d{4}">
+                <div class="gender-selector">
+                    <div class="gender-option" data-gender="male">
+                        <div class="gender-circle">
+                            <img src="src/assets/male_icons.svg" class="gender-icon" width="35" height="46" alt="Мужской">
+                        </div>
+                        <span>Муж</span>
+                    </div>
+                    <div class="gender-option" data-gender="female">
+                        <div class="gender-circle">
+                            <img src="src/assets/female_icons.svg" class="gender-icon" width="35" height="46" alt="Женский">
+                        </div>
+                        <span>Жен</span>
+                    </div>
+                </div>
+            </div>        
+            <button class="next-btn">Зарегистрироваться</button>
+        </div>
+
+        <div class="registration-screen-geolocation screen">
+            <img src="src/assets/geolocation.svg" alt="иконка геолокации" class="geo-icon">
+
+            <div class="title-container">
+                <img src="src/assets/heart-left.svg" alt="сердце" class="heart heart-left">
+                
+                <h2 class="text-title-frame">Найдем партнеров <br> поблизости</h2>
+                
+                <img src="src/assets/heart-right.svg" alt="сердце" class="heart heart-right">
+            </div>
+
+            <p class="main-text">Разрешите доступ к геолокации — ведь настоящие чувства часто начинаются совсем рядом</p>
+            
+            <button class="next-btn">Далее</button>
+        </div>
+
+        <div class="registration-screen-terms-of-use screen">
+            <img src="src/assets/terms_of_use.svg" alt="иконка условия пользований" class="terms-icon">
+
+            <div class="title-container">
+                <img src="src/assets/heart-left.svg" alt="сердце" class="heart heart-left">
+                <h2 class="text-title-frame">Принять условия <br>пользования</h2>
+                <img src="src/assets/heart-right.svg" alt="сердце" class="heart heart-right">
+            </div>
+
+            <div class="checkbox-container">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="privacyPolicy" class="custom-checkbox">
+                    <label for="privacyPolicy">Я принимаю Политику Конфиденциальности</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="ageCheckbox" class="custom-checkbox">
+                    <label for="ageCheckbox">Я принимаю Пользовательское соглашение и подтверждаю, что мне исполнилось 18 лет</label>
+                </div>
+            </div>
+
+            <button class="next-btn">Далее</button>
+        </div>
+
+        <div class="registration-screen-photo screen">
+            <h2 class="text-title">Добавьте фото</h2>
+            <div id="camera-icon" class="upload-area">
+                <img src="src/assets/Icon-camera.svg" alt="Иконка камеры" class="Icon-camera">
+            </div>
+            <input type="file" id="photo-input" accept="image/jpeg,image/png" style="display: none;">
+            <p class="main-text">Выберите фото с четким лицом, оно понадобится для верификации</p>
+            <button class="next-btn">Далее</button>
+        </div>
+
+        <div class="registration-screen-moderation-failed screen">
+            <div class="panel">
+                <h2 class="text-title">Модерация не пройдена</h2>
+                <div class="profile-photo-container">
+                    <img class="profile-photo" src="src/assets/profile-photo.svg" alt="Фото профиля">
+                </div>
+                <ul class="moderation-list">
+                    <li><img src="src/assets/heart-icon.svg" alt="сердце" class="list-icon"> Ваше лицо должно быть хорошо видно</li>
+                    <li><img src="src/assets/heart-icon.svg" alt="сердце" class="list-icon"> Вы должны быть одни на фото</li>
+                    <li><img src="src/assets/heart-icon.svg" alt="сердце" class="list-icon"> Ваше фото должно соответствовать правилам</li>
+                </ul>
+                <button class="next-btn" width="100px" height="500px">Понятно</button>
+            </div>
+        </div>
+
+        <div class="registration-screen-description-of-profile screen">
+            <div class="panel">
+                <h2 class="text-title">Добавьте описание профиля</h2>
+                <div class="profile-photo-container">
+                    <img class="profile-photo" src="src/assets/profile-photo.svg" alt="Фото профиля">
+                    <p class="main-text">Расскажите о себе:</p> 
+                </div>
+                <input type="text" id="city" name="city" placeholder="Город" maxlength="100">
+                <input type="text" id="height" name="height" placeholder="Рост" maxlength="100">
+                <input type="text" id="education" name="education" placeholder="Образование" maxlength="100">
+
+                <button class="next-btn">Далее</button>
+            </div>
+            
+        </div>
+
+        <div class="registration-screen-description-of-profile screen">
+            <div class="panel">
+                <h2 class="text-title">Добавьте описание профиля</h2>
+                <div class="profile-photo-container">
+                    <img class="profile-photo" src="src/assets/profile-photo.svg" alt="Фото профиля">
+                    <p class="main-text">Расскажите о себе:</p> 
+                </div>
+                <input type="text" id="description" name="description" placeholder="" maxlength="200">
+                <button class="next-btn">Далее</button>
+            </div>
+        </div>
+
+        <div class="registration-screen-tags screen">
+            <div class="panel">
+                <h2 class="text-title">Выберите теги</h2>
+                <p class="main-text">Они помогут найти подходящего вам человека</p>
+                <div class="tags-grid">
+                    <div class="tag-item" data-tag="альпинизм">альпинизм</div>
+                    <div class="tag-item" data-tag="аниме">аниме</div>
+                    <div class="tag-item" data-tag="архитектура">архитектура</div>
+                    <div class="tag-item" data-tag="астрономия">астрономия</div>
+                    <div class="tag-item" data-tag="автомобили">автомобили</div>
+                    <div class="tag-item" data-tag="бег">бег</div>
+                    <div class="tag-item" data-tag="бильярд">бильярд</div>
+                    <div class="tag-item" data-tag="бокс">бокс</div>
+                    <div class="tag-item" data-tag="велосипед">велосипед</div>
+                    <div class="tag-item" data-tag="видеоигры">видеоигры</div>
+                    <div class="tag-item" data-tag="волейбол">волейбол</div>
+                    <div class="tag-item" data-tag="волонтёрство">волонтёрство</div>
+                    <div class="tag-item" data-tag="вязание">вязание</div>
+                    <div class="tag-item" data-tag="гейминг">гейминг</div>
+                    <div class="tag-item" data-tag="гребля">гребля</div>
+                    <div class="tag-item" data-tag="дача">дача</div>
+                    <div class="tag-item" data-tag="дайвинг">дайвинг</div>
+                    <div class="tag-item" data-tag="джаз">джаз</div>
+                    <div class="tag-item" data-tag="живопись">живопись</div>
+                    <div class="tag-item" data-tag="животные">животные</div>
+                    <div class="tag-item" data-tag="йога">йога</div>
+                    <div class="tag-item" data-tag="иностранные языки">языки</div>
+                    <div class="tag-item" data-tag="кино">кино</div>
+                    <div class="tag-item" data-tag="книги">книги</div>
+                    <div class="tag-item" data-tag="коллекционирование">коллекционирование</div>
+                    <div class="tag-item" data-tag="кофе">кофе</div>
+                    <div class="tag-item" data-tag="кошки">кошки</div>
+                    <div class="tag-item" data-tag="кроссфит">кроссфит</div>
+                    <div class="tag-item" data-tag="кулинария">кулинария</div>
+                    <div class="tag-item" data-tag="лыжи">лыжи</div>
+                    <div class="tag-item" data-tag="медитация">медитация</div>
+                    <div class="tag-item" data-tag="музыка">музыка</div>
+                    <div class="tag-item" data-tag="настольные игры">настольные игры</div>
+                    <div class="tag-item" data-tag="оригами">оригами</div>
+                    <div class="tag-item" data-tag="пешие прогулки">пешие прогулки</div>
+                    <div class="tag-item" data-tag="писательство">писательство</div>
+                    <div class="tag-item" data-tag="плавание">плавание</div>
+                    <div class="tag-item" data-tag="психология">психология</div>
+                    <div class="tag-item" data-tag="путешествия">путешествия</div>
+                    <div class="tag-item" data-tag="рисование">рисование</div>
+                    <div class="tag-item" data-tag="рыбалка">рыбалка</div>
+                    <div class="tag-item" data-tag="садоводство">садоводство</div>
+                    <div class="tag-item" data-tag="сериалы">сериалы</div>
+                    <div class="tag-item" data-tag="сноуборд">сноуборд</div>
+                    <div class="tag-item" data-tag="собаки">собаки</div>
+                    <div class="tag-item" data-tag="спорт">спорт</div>
+                    <div class="tag-item" data-tag="танцы">танцы</div>
+                    <div class="tag-item" data-tag="театр">театр</div>
+                    <div class="tag-item" data-tag="теннис">теннис</div>
+                    <div class="tag-item" data-tag="трекинг">трекинг</div>
+                    <div class="tag-item" data-tag="туризм">туризм</div>
+                    <div class="tag-item" data-tag="фитнес">фитнес</div>
+                    <div class="tag-item" data-tag="фортепиано">фортепиано</div>
+                    <div class="tag-item" data-tag="фотография">фотография</div>
+                    <div class="tag-item" data-tag="футбол">футбол</div>
+                    <div class="tag-item" data-tag="хендмейд">хендмейд</div>
+                    <div class="tag-item" data-tag="хоккей">хоккей</div>
+                    <div class="tag-item" data-tag="шахматы">шахматы</div>
+                </div>
+
+
+                <button class="next-btn">Далее</button>
+            </div>
+            
+        </div>
+
+        <div class="registration-screen-test screen">
+            <img src="src/assets/hands-with-heart.svg" alt="иконка теста" class="test-photo">
+            <p class="text-title">Пройдите тест</p>
+            <p class="main-text">Так мы рассчитаем совместимость с каждым профилем и улучшим подбор</p>
+            <button class="next-btn">Начать</button>
+        </div>
+    <script src="registration.js"></script>
+</body>
+</html>

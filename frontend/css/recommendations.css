@@ -1,0 +1,73 @@
+
+        /* Минимальные стили для отображения */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            font-family: system-ui, sans-serif;
+        }
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            justify-content: space-between;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .card-area {
+            flex: 1;
+            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            font-size: 18px;
+            color: var(--tg-theme-hint-color);
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .action-buttons button {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, white);
+            border: none;
+            padding: 10px 16px;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .compatibility-percentage {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: var(--tg-theme-button-color);
+        }
+        .filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .filter-tag {
+            background: var(--tg-theme-secondary-bg-color, #e0e0e0);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        button {
+            cursor: pointer;
+        }

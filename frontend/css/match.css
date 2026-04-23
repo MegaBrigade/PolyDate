@@ -1,0 +1,77 @@
+/* match.css — простые стили для экрана мэтча */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #f0f0f0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.main-container {
+    max-width: 400px;
+    width: 100%;
+    background-color: white;
+    border-radius: 30px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    margin: 20px;
+}
+
+/* Логотип (если нужен) */
+.splash-container {
+    margin-bottom: 10px;
+}
+.logo {
+    width: 80px;
+    height: auto;
+}
+
+/* Надпись MATCH! */
+.frame {
+    font-size: 48px;
+    font-weight: bold;
+    color: #ff4081;
+    margin: 20px 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* Карточка с двумя анкетами */
+.card-area {
+    background-color: #f9f9f9;
+    border-radius: 20px;
+    padding: 20px;
+    margin: 20px 0;
+    font-size: 16px;
+    color: #333;
+    line-height: 1.5;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Текст-описание */
+p {
+    font-size: 14px;
+    color: #666;
+    margin: 20px 0;
+    line-height: 1.4;
+}
+
+/* Второй frame для юзернейма */
+.frame:last-of-type {
+    font-size: 24px;
+    color: #3390ec;
+    background-color: #e8f0fe;
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 40px;
+    margin-top: 10px;
+}
