@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  profile:
+    build:
+      context: .
+      dockerfile: services/profile/Dockerfile
+    command: uvicorn services.profile.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  moderation:
+    build:
+      context: .
+      dockerfile: services/moderation/Dockerfile
+    command: uvicorn services.moderation.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8001:8000"
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  notification:
+    build:
+      context: .
+      dockerfile: services/notification/Dockerfile
+    command: uvicorn services.notification.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8002:8000"
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  recommendation:
+    build:
+      context: .
+      dockerfile: services/recommendation/Dockerfile
+    command: uvicorn services.recommendation.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8003:8000"
+    env_file:
+      - .env
+    restart: unless-stopped
