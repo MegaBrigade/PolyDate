@@ -1,0 +1,189 @@
+/* RecommendationsScreen.module.css – финальная версия */
+.container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  overflow: hidden;   /* запрещаем скролл */
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 28px;
+  margin: 0;
+  font-family: 'Gilroy-ExtraBold', sans-serif;
+}
+
+.logo {
+  width: 80px;
+  height: auto;
+}
+
+.card {
+  position: relative;
+  margin: 0 20px 20px 20px;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #f0f0f0;
+  aspect-ratio: 4 / 3;          /* 4:3 – чуть шире квадрата */
+  max-height: calc(100vh - 140px); /* не вылезает за пределы экрана */
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.2s;
+}
+
+.photoTransition {
+  opacity: 0;
+}
+
+.indicators {
+  position: absolute;
+  top: 12px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+.bar {
+  flex: 1;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 2px;
+}
+.barActive {
+  background-color: white;
+}
+
+.touchZones {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  z-index: 5;
+}
+.zone {
+  flex: 1;
+  cursor: pointer;
+}
+
+.overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+  color: white;
+  z-index: 6;
+  pointer-events: none;
+}
+.overlay .actionGroup,
+.overlay .compatibility {
+  pointer-events: auto;
+}
+
+.nameAge {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.bio {
+  font-family: 'Gilroy-Light', sans-serif;
+  font-size: 14px;
+  margin-bottom: 16px;
+  opacity: 0.9;
+}
+
+.actionGroup {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s;
+}
+.btn:active {
+  transform: scale(0.95);
+}
+.dislike {
+  background-color: #333;
+}
+.like {
+  background-color: white;
+}
+.icon {
+  width: 28px;
+  height: 28px;
+}
+
+/* Процент совместимости – в левом верхнем углу, как в лайках */
+.compatibility {
+  position: absolute;
+  top: 20px;
+  left: 20px;                   /* левый верхний угол */
+  background: linear-gradient(135deg, #FF76C1, #F84CAA);
+  color: white;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 12;
+}
+
+.matchOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  color: white;
+  animation: fadeIn 0.3s;
+}
+.matchTitle {
+  font-size: 60px;
+  color: #F84CAA;
+  margin-bottom: 20px;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

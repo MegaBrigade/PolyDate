@@ -1,109 +1,129 @@
 import React, { useState } from 'react';
-// import './css/recommendations.css';
+import styles from './css/RecommendationsScreen.module.css';
 
 const mockProfiles = [
   {
     id: 1,
     name: 'Анна',
     age: 25,
-    city: 'Москва',
-    photos: ['/assets/photo1.jpg', '/assets/photo2.jpg'],
+    bio: 'Люблю путешествия и кофе. Ищу человека, с которым можно разделить рассветы.',
+    photos: ['/assets/photo-anna.svg', '/assets/photo-anna.svg', '/assets/photo-anna.svg'],
     compatibility: 90,
-    description: 'Люблю путешествия и кофе'
+    isMutual: true
   },
   {
     id: 2,
     name: 'Мария',
     age: 28,
-    city: 'СПб',
-    photos: ['/assets/photo3.jpg'],
+    bio: 'Архитектор. Верю в минимализм и искренность.',
+    photos: ['/assets/photo-anna.svg'],
     compatibility: 75,
+    isMutual: false
   },
 ];
 
 export default function RecommendationsScreen() {
-  const [profiles, setProfiles] = useState(mockProfiles);
-  const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
-  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [profiles] = useState(mockProfiles);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentPhoto, setCurrentPhoto] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showMatch, setShowMatch] = useState(false);
 
-  const currentProfile = profiles[currentProfileIndex];
+  const user = profiles[currentIndex];
 
-  const nextPhoto = () => {
-    if (currentProfile.photos.length > 1) {
-      setCurrentPhotoIndex((prev) => (prev + 1) % currentProfile.photos.length);
-    }
+  const handleNextPhoto = () => {
+    if (isTransitioning) return;
+    if (user.photos.length === 1) return;
+    setIsTransitioning(true);
+    const next = (currentPhoto + 1) % user.photos.length;
+    setTimeout(() => {
+      setCurrentPhoto(next);
+      setIsTransitioning(false);
+    }, 150);
   };
 
-  const prevPhoto = () => {
-    if (currentProfile.photos.length > 1) {
-      setCurrentPhotoIndex((prev) => (prev - 1 + currentProfile.photos.length) % currentProfile.photos.length);
-    }
+  const handlePrevPhoto = () => {
+    if (isTransitioning) return;
+    if (user.photos.length === 1) return;
+    setIsTransitioning(true);
+    const prev = (currentPhoto - 1 + user.photos.length) % user.photos.length;
+    setTimeout(() => {
+      setCurrentPhoto(prev);
+      setIsTransitioning(false);
+    }, 150);
   };
 
-  const handleLike = () => {
-    alert(`Вы лайкнули ${currentProfile.name}`);
-    // Здесь отправить лайк на бэкенд
-    nextProfile();
-  };
-
-  const handleDislike = () => {
-    alert(`Вы дизлайкнули ${currentProfile.name}`);
-    // здесь отправить дизлайк
-    nextProfile();
-  };
-
-  const nextProfile = () => {
-    if (currentProfileIndex + 1 < profiles.length) {
-      setCurrentProfileIndex(currentProfileIndex + 1);
-      setCurrentPhotoIndex(0);
+  const handleAction = (type) => {
+    if (type === 'like' && user.isMutual) {
+      setShowMatch(true);
     } else {
-      alert('Анкеты закончились');
+      moveToNextProfile();
     }
   };
 
-  if (!currentProfile) return <div>Нет анкет</div>;
+  const moveToNextProfile = () => {
+    if (currentIndex < profiles.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setCurrentPhoto(0);
+    } else {
+      alert("Анкеты временно закончились");
+    }
+  };
+
+  if (!user) return <div className={styles.container}>Загрузка...</div>;
 
   return (
-    <div className="recommendations-container">
-      <div className="user-info">
-        <img src="/assets/filters.svg" alt="фильтры" />
-        <span>Фильтры</span>
-      </div>
-
-      <div className="card-area">
-        {/* Фотография с возможностью перелистывания */}
-        <div className="photo-slider">
-          <img 
-            src={currentProfile.photos[currentPhotoIndex]} 
-            alt={`${currentProfile.name}`} 
-          />
-          {currentProfile.photos.length > 1 && (
-            <div className="photo-nav">
-              <button onClick={prevPhoto}>◀</button>
-              <span>{currentPhotoIndex+1}/{currentProfile.photos.length}</span>
-              <button onClick={nextPhoto}>▶</button>
-            </div>
-          )}
+    <div className={styles.container}>
+      {showMatch && (
+        <div className={styles.matchOverlay}>
+          <h1 className={styles.matchTitle}>MATCH!</h1>
+          <p>Вы понравились друг другу!</p>
+          <button className={styles.btn} style={{width: '200px', marginTop: '20px'}} onClick={() => {setShowMatch(false); moveToNextProfile();}}>
+            Продолжить
+          </button>
         </div>
-        <h3>{currentProfile.name}, {currentProfile.age}</h3>
-        <p>{currentProfile.city}</p>
-        <div className="compatibility-percentage">
-          {currentProfile.compatibility}% совместимости
+      )}
+
+      <header className={styles.header}>
+        <h1 className={styles.title}>Для вас</h1>
+        <img src="/assets/polydate.svg" alt="logo" className={styles.logo} />
+      </header>
+
+      <div className={styles.card}>
+        <div className={styles.indicators}>
+          {user.photos.map((_, i) => (
+            <div key={i} className={`${styles.bar} ${i === currentPhoto ? styles.barActive : ''}`} />
+          ))}
         </div>
-      </div>
+        <div className={styles.compatibility}>
+          {user.compatibility}%
+        </div>
+        <img
+          src={user.photos[currentPhoto]}
+          alt={user.name}
+          className={`${styles.photo} ${isTransitioning ? styles.photoTransition : ''}`}
+        />
 
-      <div className="action-buttons">
-        <button className="dislike-btn" onClick={handleDislike}>👎</button>
-        <button className="like-btn" onClick={handleLike}>❤️</button>
-        <button className="info-btn" onClick={() => alert(`Подробнее о ${currentProfile.name}`)}>📄</button>
-        <button className="back-btn" onClick={nextProfile}>Следующий</button>
-      </div>
+        <div className={styles.touchZones}>
+          <div className={styles.zone} onClick={handlePrevPhoto} />
+          <div className={styles.zone} onClick={handleNextPhoto} />
+        </div>
 
-      <div className="filters">
-        <span>Фильтр: возраст</span>
-        <span>Фильтр: расстояние</span>
-        <span>Фильтр: интересы</span>
-        <button>Настроить</button>
+        <div className={styles.overlay}>
+          <div className={styles.nameAge}>{user.name}, {user.age}</div>
+          <p className={styles.bio}>{user.bio}</p>
+
+          <div className={styles.actionGroup}>
+            <button className={`${styles.btn} ${styles.dislike}`} onClick={() => handleAction('dislike')}>
+              <img src="/assets/dislike.svg" alt="no" className={styles.icon} />
+            </button>
+            <button className={`${styles.btn} ${styles.like}`} onClick={() => handleAction('like')}>
+              <img src="/assets/like.svg" alt="yes" className={styles.icon} />
+            </button>
+          </div>
+
+
+        </div>
       </div>
     </div>
   );
