@@ -1,10 +1,10 @@
-/* RecommendationsScreen.module.css – финальная версия */
+
 .container {
   height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: #fff;
-  overflow: hidden;   /* запрещаем скролл */
+  overflow: hidden;
   padding: 0;
 }
 
@@ -33,8 +33,8 @@
   border-radius: 28px;
   overflow: hidden;
   background: #f0f0f0;
-  aspect-ratio: 4 / 3;          /* 4:3 – чуть шире квадрата */
-  max-height: calc(100vh - 140px); /* не вылезает за пределы экрана */
+  aspect-ratio: 4 / 3;
+  max-height: calc(100vh - 140px);
 }
 
 .photo {
@@ -144,11 +144,10 @@
   height: 28px;
 }
 
-/* Процент совместимости – в левом верхнем углу, как в лайках */
 .compatibility {
   position: absolute;
   top: 20px;
-  left: 20px;                   /* левый верхний угол */
+  left: 20px;
   background: linear-gradient(135deg, #FF76C1, #F84CAA);
   color: white;
   width: 55px;

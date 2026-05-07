@@ -56,7 +56,7 @@ export default function RecommendationsScreen({ onMatch }) {
   const handleAction = (type) => {
     if (type === 'like' && user.isMutual) {
       // setShowMatch(true);
-      onMatch?.(user);  // вызываем переданный колбэк
+      onMatch?.(user);
     } else {
       moveToNextProfile();
     }
@@ -76,7 +76,7 @@ export default function RecommendationsScreen({ onMatch }) {
     if (parent) parent.style.overflowY = 'hidden';
     
     return () => {
-      if (parent) parent.style.overflowY = 'auto'; // возвращаем при уходе с экрана
+      if (parent) parent.style.overflowY = 'auto';
     };
   }, []);
   if (!user) return <div className={styles.container}>Загрузка...</div>;

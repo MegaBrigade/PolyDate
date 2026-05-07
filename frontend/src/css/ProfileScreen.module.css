@@ -1,4 +1,4 @@
-/* ProfileScreen.module.css */
+
 .profileContainer {
   height: 100vh;
   overflow-y: auto;
@@ -116,7 +116,7 @@
 .menuValue {
   font-family: 'Gilroy-ExtraBold', sans-serif;
   font-size: 16px;
-  color: #F84CAA; /* Розовый акцент из вашего стиля */
+  color: #F84CAA;
 }
 
 .arrow {
@@ -124,16 +124,15 @@
   height: 14px;
   opacity: 0.3;
 }
-/* Увеличиваем аватарку */
+
 .cardArea img {
-  width: 140px;          /* больше */
+  width: 140px;
   height: 140px;
   border-radius: 50%;
   object-fit: cover;
   margin-bottom: 16px;
 }
 
-/* Серая подпись "Профиль" */
 .profileLabel {
   color: #888;
   font-size: 14px;
@@ -141,7 +140,6 @@
   margin-top: 4px;
 }
 
-/* Кнопки с иконками */
 .profileButtons {
   display: flex;
   gap: 12px;
@@ -170,4 +168,116 @@
   object-fit: contain;
 }
 
-/* Остальные стили (меню) уже есть */
+
+.menuItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 0;
+  border-bottom: 1px solid #F5F5F5;
+  cursor: pointer;
+}
+
+.menuLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menuIcon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.menuLabel {
+  font-family: 'Gilroy-Light', sans-serif;
+  font-size: 16px;
+  color: #383436;
+}
+
+.menuValue {
+  font-family: 'Gilroy-ExtraBold', sans-serif;
+  font-size: 16px;
+  color: #F84CAA;
+  margin-left: 36px;
+}
+
+.bioCard {
+  background: #f9f9f9;
+  border-radius: 20px;
+  padding: 16px;
+  margin-top: 8px;
+  font-family: 'Gilroy-Light', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #383436;
+}
+
+.infoCard {
+  background: #f9f9f9;
+  border-radius: 20px;
+  padding: 8px 0;
+  margin-top: 8px;
+}
+
+.infoItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.infoItem:last-child {
+  border-bottom: none;
+}
+
+.infoIcon {
+  width: 32px;
+  text-align: center;
+}
+
+.infoImg {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.infoContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.infoLabel {
+  font-family: 'Gilroy-ExtraBold', sans-serif;
+  font-size: 14px;
+  color: black;
+}
+
+.infoValue {
+  font-family: 'Gilroy-Light', sans-serif;
+  font-size: 16px;
+  color: #383436;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 4px;
+}
+
+.title {
+  font-size: 28px;
+  font-family: 'Gilroy-ExtraBold', sans-serif;
+  margin: 0;
+}
+
+.logo {
+  width: 80px;
+  height: auto;
+}
