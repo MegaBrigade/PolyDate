@@ -1,0 +1,142 @@
+
+.likesContainer {
+  padding: 16px;
+  background-color: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Gilroy-ExtraBold', system-ui, sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-top: 10px;
+}
+
+.title {
+  font-size: 32px;
+  color: #333;
+  margin: 0;
+}
+
+
+.logo {
+    width: 80px;
+    height: auto;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  border-radius: 24px;
+  overflow: hidden;
+  aspect-ratio: 3 / 4; 
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.badge {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: linear-gradient(135deg, #FF76C1, #F84CAA);
+  color: white;
+  padding: 10px;
+  border-radius: 50%;
+  width: 55px;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 900;
+  box-shadow: 0 4px 15px rgba(248, 76, 170, 0.4);
+}
+
+.overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+  color: white;
+}
+
+.name {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.description {
+  font-family: 'Gilroy-Light', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  margin-bottom: 24px;
+  opacity: 0.9;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 12px;
+}
+
+.actionBtn {
+  flex: 1;
+  height: 56px;
+  border: none;
+  border-radius: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s;
+}
+
+.actionBtn:active {
+  transform: scale(0.95);
+}
+
+.dislike {
+  background-color: #333;
+}
+
+.like {
+  background-color: #fff;
+}
+
+.icon {
+  width: 28px;
+  height: 28px;
+}
+.likesContainer {
+  padding-bottom: 80px;
+  height: 100vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+.photo {
+  width: 100%;
+  max-height: 50vh;
+  object-fit: cover;
+  border-radius: 20px;
+}
+.like.likedActive {
+  background-color: #ff69b4;
+
+}
+.like.likedActive img {
+  filter: brightness(0) invert(1);
+
+}

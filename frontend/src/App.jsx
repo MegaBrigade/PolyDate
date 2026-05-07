@@ -1,41 +1,42 @@
 
+// import React, { useState } from 'react';
+// import SplashScreen from './SplashScreen';
+// import RegistrationWizard from './RegistrationWizard';
+// import MainApp from './MainApp';
+// import Test from './Test';
+// function App() {
+//   const [showSplash, setShowSplash] = useState(true);
+//   const [isRegistered, setIsRegistered] = useState(false);
 
+//   if (showSplash) {
+//     return <SplashScreen onFinish={() => setShowSplash(false)} />;
+//   }
 
+//   if (!isRegistered) {
+//     return <RegistrationWizard onComplete={() => setIsRegistered(true)} />;
+//   }
 
+//   return <MainApp />;
+// }
 
+// export default App;
 
-
-
-
-
-
-
-
-
-
-
-import React, { useState } from 'react';
-import SplashScreen from './SplashScreen';
-import RegistrationWizard from './RegistrationWizard';
-import Test from './Test';
+import React from 'react';
+import MainApp from './MainApp';
 
 function App() {
-  const [showSplash, setShowSplash] = useState(true);
-  
-  
-  const urlParams = new URLSearchParams(window.location.search);
-  const directTest = urlParams.get('test') === '1';
-
-  if (directTest) {
-    
-    return <Test onFinish={() => window.location.href = '/'} />;
-  }
-
-  if (showSplash) {
-    return <SplashScreen onFinish={() => setShowSplash(false)} />;
-  }
-
-  return <RegistrationWizard />;
+  // Временно показываем только главное меню
+  return <MainApp />;
 }
 
 export default App;
+
+
+
+
+
+
+
+
+
+

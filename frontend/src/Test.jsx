@@ -105,7 +105,7 @@ export default function Test({ onFinish }) {
         </div>
         );
     }
-
+    
     if (step === 'result') {
         const result = calculateResult();
         return (
