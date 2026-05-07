@@ -14,13 +14,13 @@ export default function BottomNavBar({ activeTab, onTabChange }) {
         className={activeTab === 'recommendations' ? 'active' : ''} 
         onClick={() => onTabChange('recommendations')}
       >
-        👤
+      <img src="/assets/icon-of-menu2.svg" alt="POLY DATE"></img>
       </button>
       <button 
         className={activeTab === 'profile' ? 'active' : ''} 
         onClick={() => onTabChange('profile')}
       >
-        👤
+      <img src="/assets/icon-of-menu3.svg" alt="POLY DATE"></img>
       </button>
     </div>
   );

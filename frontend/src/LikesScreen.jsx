@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import styles from './css/likes.module.css';
 
@@ -42,13 +41,14 @@ export default function LikesScreen() {
         <h1 className={styles.title}>Лайки</h1>
         <img src="/assets/polydate.svg" alt="POLY DATE" className={styles.logo} />
       </header>
+      
 
       <div className={styles.likesList}>
         {likes.map(user => (
           <div key={user.id} className={styles.card}>
             <img src={user.photo} alt={user.name} className={styles.photo} />
-            <div className={styles.cardContent}>
-              <div className={styles.badge}>{user.compatibility}%</div>
+            <div className={styles.badge}>{user.compatibility}%</div>
+            <div className={styles.overlay}>
               <div className={styles.name}>{user.name}, {user.age}</div>
               <p className={styles.description}>{user.description}</p>
               <div className={styles.buttonGroup}>
