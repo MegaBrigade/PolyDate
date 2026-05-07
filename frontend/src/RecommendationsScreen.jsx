@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, onMatch } from 'react';
 import styles from './css/RecommendationsScreen.module.css';
 
 const mockProfiles = [
@@ -22,7 +22,7 @@ const mockProfiles = [
   },
 ];
 
-export default function RecommendationsScreen() {
+export default function RecommendationsScreen({ onMatch }) {
   const [profiles] = useState(mockProfiles);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentPhoto, setCurrentPhoto] = useState(0);
@@ -55,7 +55,8 @@ export default function RecommendationsScreen() {
 
   const handleAction = (type) => {
     if (type === 'like' && user.isMutual) {
-      setShowMatch(true);
+      // setShowMatch(true);
+      onMatch?.(user);  // вызываем переданный колбэк
     } else {
       moveToNextProfile();
     }
@@ -69,7 +70,15 @@ export default function RecommendationsScreen() {
       alert("Анкеты временно закончились");
     }
   };
-
+  useEffect(() => {
+    // Находим родительский контейнер и отключаем скролл
+    const parent = document.querySelector('.app-main');
+    if (parent) parent.style.overflowY = 'hidden';
+    
+    return () => {
+      if (parent) parent.style.overflowY = 'auto'; // возвращаем при уходе с экрана
+    };
+  }, []);
   if (!user) return <div className={styles.container}>Загрузка...</div>;
 
   return (

@@ -1,23 +1,20 @@
 import React from 'react';
-// import '../css/match.css';
+import styles from './css/MatchScreen.module.css';
 
 export default function MatchScreen({ matchUser, onClose }) {
-  // matchUser – объект с данными пользователя, с которым мэтч
   const user = matchUser || { username: '@MegaBrigade' };
-
   return (
-    <div className="match-container">
-      <div className="frame">MATCH!</div>
-      <div className="card-area">
-        <div>Анкета пользователя 1</div>
-        <div>Анкета пользователя 2</div>
+    <div className={styles.container}>
+      <div className={styles.header}>MATCH!</div>
+      <div className={styles.cardArea}>
+        <div className={styles.userCard}>Ваша анкета</div>
+        <div className={styles.userCard}>Анкета {user.username}</div>
       </div>
-      <p>
-        Собеседник уже ждет знакомства. Откройте контакты собеседника и сделайте первый шаг.
-        Кто знает, возможно, это начало чего-то большого?
+      <p className={styles.description}>
+        Собеседник уже ждет знакомства. Откройте контакты и сделайте первый шаг.
       </p>
-      <div className="frame">{user.username}</div>
-      <button onClick={onClose}>Закрыть</button>
+      <div className={styles.usernameFrame}>{user.username}</div>
+      <button className={styles.closeBtn} onClick={onClose}>Закрыть</button>
     </div>
   );
 }
