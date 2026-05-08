@@ -7,8 +7,8 @@ const initialLikes = [
     name: 'Малышка', 
     age: 21, 
     compatibility: 95,
-    description: 'Я верю, что где-то в этом шумном мире живет тихое счастье...',
-    photo: '/assets/photo-anna.svg',
+    description: 'Я верю, что где-то в этом шумном мире живет тихое счастье...Гора эверест на фоне меня это любовь',
+    photo: '/assets/5380084942638880566.jpg',
     liked: false
   },
   { 
@@ -18,6 +18,15 @@ const initialLikes = [
     compatibility: 90,
     description: 'Люблю белые ночи, какао с кокосовым сиропом и желтый макияж.',
     photo: '/assets/polydate.svg',
+    liked: false
+  },
+  { 
+    id: 3, 
+    name: 'Евгений Негролов', 
+    age: 22, 
+    compatibility: 90,
+    description: 'Ищу девушек без паспорта',
+    photo: '/assets/5469930019179139532.jpg',
     liked: false
   }
 ];

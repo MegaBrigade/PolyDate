@@ -1,0 +1,35 @@
+.container {
+    height: 100vh;
+    background: white;
+    padding: 20px;
+    font-family: 'Gilroy-ExtraBold', sans-serif;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.backBtn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.menuItem {
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+}

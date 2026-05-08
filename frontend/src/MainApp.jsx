@@ -23,7 +23,7 @@
 //   };
 
 //   return (
-//     <div className="main-app">   {/* ← добавить эту обёртку */}
+//     <div className="main-app">   {}
 //       <div className="app-main">
 //         {renderContent()}
 //         <BottomNavBar activeTab={activeTab} onTabChange={setActiveTab} />
@@ -85,7 +85,7 @@ export default function MainApp() {
       case 'profile':
         return <ProfileScreen />;
       case 'matches':
-        return <LikesScreen />;   // показываем список лайков, а не MatchScreen
+        return <LikesScreen />; 
       default:
         return <RecommendationsScreen onMatch={showMatch} />;
     }

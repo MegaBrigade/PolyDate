@@ -281,3 +281,64 @@
   width: 80px;
   height: auto;
 }
+.avatarWrapper {
+  position: relative;
+  display: inline-block;
+  padding: 8px;
+  border: 4px solid #F84CAA; 
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.avatarWrapper:hover {
+  transform: scale(1.05);
+}
+
+.mainAvatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatarBadge {
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #F84CAA;
+  color: white;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+}
+
+
+.photoViewer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: black;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fullPhoto {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+.photoCounter {
+  position: absolute;
+  top: 40px;
+  color: white;
+  font-size: 18px;
+}
