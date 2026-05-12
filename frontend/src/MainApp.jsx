@@ -49,8 +49,7 @@ import ProfileScreen from './ProfileScreen';
 import LikesScreen from './LikesScreen';
 import MatchScreen from './MatchScreen';
 import './css/main.css';
-
-// Мок-данные для рекомендаций
+import ProfileModal from './ProfileModal';
 const mockProfiles = [
   {
     id: 1,
@@ -58,6 +57,9 @@ const mockProfiles = [
     age: 25,
     bio: 'Люблю путешествия и кофе. Ищу человека, с которым можно разделить рассветы.',
     photos: ['/assets/photo-anna.svg', '/assets/photo-anna.svg', '/assets/photo-anna.svg'],
+    city: 'Москва',
+    education: 'Высшее',
+    height: 170,
     compatibility: 90,
     isMutual: true
   },
@@ -67,12 +69,14 @@ const mockProfiles = [
     age: 28,
     bio: 'Архитектор. Верю в минимализм и искренность.',
     photos: ['/assets/photo-anna.svg'],
+    city: 'Санкт-Петербург',
+    education: 'Среднее специальное',
+    height: 165,
     compatibility: 75,
     isMutual: false
   },
 ];
 
-// Мок-данные для лайков
 const mockLikes = [
   {
     id: 1,
@@ -80,7 +84,7 @@ const mockLikes = [
     age: 21,
     compatibility: 95,
     description: 'Я верю, что где-то в этом шумном мире живет тихое счастье...',
-    photo: '/assets/5380084942638880566.jpg',
+    photos: ['/assets/photo-anna.svg','/assets/5380084942638880566.jpg','/assets/photo-anna.svg'],
     liked: false
   },
   {
@@ -89,7 +93,7 @@ const mockLikes = [
     age: 22,
     compatibility: 90,
     description: 'Люблю белые ночи, какао с кокосовым сиропом и желтый макияж.',
-    photo: '/assets/polydate.svg',
+    photos: ['/assets/photo-anna.svg','/assets/5380084942638880566.jpg','/assets/photo-anna.svg'],
     liked: false
   },
   {
@@ -98,12 +102,13 @@ const mockLikes = [
     age: 22,
     compatibility: 90,
     description: 'Ищу девушек без паспорта',
-    photo: '/assets/5469930019179139532.jpg',
+    photos: ['/assets/5469930019179139532.jpg','/assets/5380084942638880566.jpg','/assets/photo-anna.svg'],
     liked: false
   }
 ];
 
 export default function MainApp() {
+  
   const [activeTab, setActiveTab] = useState('recommendations');
   const [matchData, setMatchData] = useState(null);
 
@@ -111,7 +116,9 @@ export default function MainApp() {
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
 
   const [likes, setLikes] = useState(mockLikes);
-
+  const [selectedProfile, setSelectedProfile] = useState(null);
+  const openProfileModal = (user) => setSelectedProfile(user);
+  const closeProfileModal = () => setSelectedProfile(null);
   const showMatch = (user) => setMatchData(user);
   const hideMatch = () => setMatchData(null);
 
@@ -143,6 +150,7 @@ export default function MainApp() {
             currentIndex={currentProfileIndex}
             onNextProfile={nextProfile}
             onMatch={showMatch}
+            onOpenProfile={openProfileModal}
           />
         );
       case 'profile':
@@ -153,6 +161,7 @@ export default function MainApp() {
             likes={likes}
             onLike={handleLikeInLikes}
             onDislike={handleDislikeInLikes}
+            onOpenProfile={openProfileModal}
           />
         );
       default:
@@ -170,6 +179,7 @@ export default function MainApp() {
           <BottomNavBar activeTab={activeTab} onTabChange={setActiveTab} />
         </>
       )}
+      {selectedProfile && <ProfileModal user={selectedProfile} onClose={closeProfileModal} />}
     </div>
   );
 }

@@ -1,10 +1,13 @@
-
 .likesContainer {
   padding: 16px;
   padding-bottom: 80px;
   background-color: #fff;
   font-family: 'Gilroy-ExtraBold', system-ui, sans-serif;
   min-height: 100%;
+  max-width: 1300px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
@@ -14,40 +17,17 @@
   margin-bottom: 24px;
   padding-top: 10px;
 }
-
-.title {
-  font-size: 32px;
-  color: #333;
-  margin: 0;
-}
-
-.logo {
-  width: 80px;
-  height: auto;
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  z-index: 10;
-}
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  padding-top: 10px;
-}
-
 .title {
   flex: 1;
   font-size: 32px;
   color: #333;
   margin: 0;
 }
-
 .logo {
   width: 80px;
   height: auto;
 }
+
 .likesList {
   display: flex;
   flex-direction: column;
@@ -57,17 +37,47 @@
 .card {
   position: relative;
   width: 100%;
-  border-radius: 24px;
+  border-radius: 28px;
   overflow: hidden;
-  aspect-ratio: 4 / 5;
   background: #f0f0f0;
+  aspect-ratio: 4 / 5;
+}
+@media (min-width: 600px) {
+  .card {
+    aspect-ratio: 4 / 3;
+  }
 }
 
+.photoContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
 .photo {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.indicators {
+  position: absolute;
+  top: 12px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+.bar {
+  flex: 1;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 2px;
+}
+.barActive {
+  background-color: white;
 }
 
 .badge {
@@ -89,22 +99,11 @@
   z-index: 2;
 }
 
-.overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 20px;
-  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
-  color: white;
-  z-index: 2;
-}
 
 .name {
   font-size: 28px;
   margin-bottom: 8px;
 }
-
 .description {
   font-family: 'Gilroy-Light', sans-serif;
   font-size: 14px;
@@ -112,12 +111,10 @@
   margin-bottom: 16px;
   opacity: 0.9;
 }
-
 .buttonGroup {
   display: flex;
   gap: 12px;
 }
-
 .actionBtn {
   flex: 1;
   height: 48px;
@@ -129,47 +126,54 @@
   justify-content: center;
   transition: transform 0.1s;
 }
-
 .actionBtn:active {
   transform: scale(0.95);
 }
-
 .dislike {
   background-color: #333;
 }
-
 .like {
   background-color: #fff;
 }
-
 .icon {
   width: 24px;
   height: 24px;
 }
-
 .like.likedActive {
   background-color: #ff69b4;
 }
 .like.likedActive img {
   filter: brightness(0) invert(1);
 }
-.likesContainer {
-  max-width: 1300px;
-  margin: 0 auto;       
-  padding: 16px;
-  background-color: #fff;
-  min-height: 100vh;
+
+.touchZones {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 130px; 
   display: flex;
-  flex-direction: column;
-  font-family: 'Gilroy-ExtraBold', system-ui, sans-serif;
+  z-index: 1;
+}
+.zone {
+  flex: 1;
+  cursor: pointer;
 }
 
-.card {
-  aspect-ratio: 3 / 4;
+.overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+  color: white;
+  z-index: 20;       
+  pointer-events: auto; 
 }
 
-@media (min-width: 600px) {
-  .card {
-    aspect-ratio: 4 / 3;
-  }
+.overlay .name,
+.overlay .description,
+.overlay .buttonGroup {
+  pointer-events: auto;
 }

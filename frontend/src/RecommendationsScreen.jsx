@@ -148,7 +148,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './css/RecommendationsScreen.module.css';
 
-export default function RecommendationsScreen({ profiles, currentIndex, onNextProfile, onMatch }) {
+export default function RecommendationsScreen({ profiles, currentIndex, onNextProfile, onMatch, onOpenProfile }) {
   const [currentPhoto, setCurrentPhoto] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const user = profiles[currentIndex];
@@ -209,16 +209,30 @@ export default function RecommendationsScreen({ profiles, currentIndex, onNextPr
           ))}
         </div>
         <div className={styles.compatibility}>{user.compatibility}%</div>
+        {/* <img
+          src={user.photos[currentPhoto]}
+          alt={user.name}
+          className={`${styles.photo} ${isTransitioning ? styles.photoTransition : ''}`}
+        /> */}
+        {/* <div onClick={() => onOpenProfile(user)} style={{ cursor: 'pointer' }}>
+          <img
+            src={user.photos[currentPhoto]}
+            alt={user.name}
+            className={`${styles.photo} ${isTransitioning ? styles.photoTransition : ''}`}
+          />
+        </div> */}
         <img
           src={user.photos[currentPhoto]}
           alt={user.name}
           className={`${styles.photo} ${isTransitioning ? styles.photoTransition : ''}`}
+          onClick={() => onOpenProfile(user)}
+          style={{ cursor: 'pointer' }}
         />
         <div className={styles.touchZones}>
           <div className={styles.zone} onClick={handlePrevPhoto} />
           <div className={styles.zone} onClick={handleNextPhoto} />
         </div>
-        <div className={styles.overlay}>
+        {/* <div className={styles.overlay}>
           <div className={styles.nameAge}>{user.name}, {user.age}</div>
           <p className={styles.bio}>{user.bio}</p>
           <div className={styles.actionGroup}>
@@ -226,6 +240,18 @@ export default function RecommendationsScreen({ profiles, currentIndex, onNextPr
               <img src="/assets/dislike.svg" alt="no" className={styles.icon} />
             </button>
             <button className={`${styles.btn} ${styles.like}`} onClick={() => handleAction('like')}>
+              <img src="/assets/like.svg" alt="yes" className={styles.icon} />
+            </button>
+          </div>
+        </div> */}
+        <div className={styles.overlay} onClick={() => onOpenProfile(user)}>
+          <div className={styles.nameAge}>{user.name}, {user.age}</div>
+          <p className={styles.bio}>{user.bio}</p>
+          <div className={styles.actionGroup}>
+            <button className={`${styles.btn} ${styles.dislike}`} onClick={(e) => { e.stopPropagation(); handleAction('dislike'); }}>
+              <img src="/assets/dislike.svg" alt="no" className={styles.icon} />
+            </button>
+            <button className={`${styles.btn} ${styles.like}`} onClick={(e) => { e.stopPropagation(); handleAction('like'); }}>
               <img src="/assets/like.svg" alt="yes" className={styles.icon} />
             </button>
           </div>

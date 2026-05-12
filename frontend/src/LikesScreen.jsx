@@ -86,10 +86,47 @@
 //   );
 // }
 
+
+// import React from 'react';
+// import styles from './css/likes.module.css';
+// import LikeCard from './LikeCard';
+// export default function LikesScreen({ likes, onLike, onDislike, onOpenProfile}) {
+//   return (
+//     <div className={styles.likesContainer}>
+//       <header className={styles.header}>
+//         <h1 className={styles.title}>Лайки</h1>
+//         <img src="/assets/polydate.svg" alt="POLY DATE" className={styles.logo} />
+//       </header>
+//       <div className={styles.likesList}>
+//         {likes.map(user => (
+//           <div key={user.id} className={styles.card}>
+//             <img src={user.photo} alt={user.name} className={styles.photo} />
+//             <div className={styles.badge}>{user.compatibility}%</div>
+//             <div className={styles.overlay}>
+//               <div className={styles.name}>{user.name}, {user.age}</div>
+//               <p className={styles.description}>{user.description}</p>
+//               <div className={styles.buttonGroup}>
+//                 <button onClick={() => onDislike(user.id)} className={`${styles.actionBtn} ${styles.dislike}`}>
+//                   <img src="/assets/dislike.svg" alt="dislike" className={styles.icon} />
+//                 </button>
+//                 <button onClick={() => onLike(user)} className={`${styles.actionBtn} ${styles.like} ${user.liked ? styles.likedActive : ''}`}>
+//                   <img src="/assets/like.svg" alt="like" className={styles.icon} />
+//                 </button>
+//               </div>
+//             </div>
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// }
+
+
 import React from 'react';
 import styles from './css/likes.module.css';
+import LikeCard from './LikeCard';
 
-export default function LikesScreen({ likes, onLike, onDislike }) {
+export default function LikesScreen({ likes, onLike, onDislike, onOpenProfile }) {
   return (
     <div className={styles.likesContainer}>
       <header className={styles.header}>
@@ -98,22 +135,13 @@ export default function LikesScreen({ likes, onLike, onDislike }) {
       </header>
       <div className={styles.likesList}>
         {likes.map(user => (
-          <div key={user.id} className={styles.card}>
-            <img src={user.photo} alt={user.name} className={styles.photo} />
-            <div className={styles.badge}>{user.compatibility}%</div>
-            <div className={styles.overlay}>
-              <div className={styles.name}>{user.name}, {user.age}</div>
-              <p className={styles.description}>{user.description}</p>
-              <div className={styles.buttonGroup}>
-                <button onClick={() => onDislike(user.id)} className={`${styles.actionBtn} ${styles.dislike}`}>
-                  <img src="/assets/dislike.svg" alt="dislike" className={styles.icon} />
-                </button>
-                <button onClick={() => onLike(user)} className={`${styles.actionBtn} ${styles.like} ${user.liked ? styles.likedActive : ''}`}>
-                  <img src="/assets/like.svg" alt="like" className={styles.icon} />
-                </button>
-              </div>
-            </div>
-          </div>
+          <LikeCard
+            key={user.id}
+            user={user}
+            onLike={onLike}
+            onDislike={onDislike}
+            onOpenProfile={onOpenProfile}
+          />
         ))}
       </div>
     </div>
