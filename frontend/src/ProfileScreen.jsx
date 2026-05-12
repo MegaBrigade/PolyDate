@@ -100,17 +100,15 @@
 //     </div>
 //   );
 // }
-import React, { useRef, useState } from 'react'; // Добавили useState
+import React, { useRef, useState } from 'react';
 import styles from './css/ProfileScreen.module.css';
 
-// Импортируем твои экраны (убедись, что пути правильные)
 import ProfileEditScreen from './ProfileEditScreen';
 import SettingsScreen from './SettingsScreen';
 import PhotoGalleryScreen from './PhotoGalleryScreen';
 export default function ProfileScreen({ userData }) {
   const fileInputRef = useRef(null);
   
-  // 1. Добавляем состояние для управления экранами
   const [activeView, setActiveView] = useState('main');
 
   const mockUser = {
@@ -124,25 +122,18 @@ export default function ProfileScreen({ userData }) {
   };
   
   const data = userData || mockUser;
-// ... в начале компонента ProfileScreen
   const [showGallery, setShowGallery] = useState(false);
-
-  // Обработчик для клика по аватару
   const handleAvatarClick = () => {
     setShowGallery(true);
   };
-
-  // Функция для добавления нового фото
   const handleAddPhoto = () => {
     fileInputRef.current.click();
   };
 
-  // Обработчик выбора файла
   const onFileChange = (e) => {
     if (e.target.files[0]) {
       // Здесь будет логика загрузки фото на сервер
       console.log("Файл выбран:", e.target.files[0]);
-      // После загрузки обновите массив photos
     }
   };
 
@@ -168,7 +159,6 @@ export default function ProfileScreen({ userData }) {
         photos={data.photos}
         onBack={() => setShowGallery(false)}
         onSave={(updatedPhotos) => {
-          // Здесь можно обновить данные – пока просто закроем галерею
           console.log('Новый список фото:', updatedPhotos);
           setShowGallery(false);
         }}
@@ -179,7 +169,6 @@ export default function ProfileScreen({ userData }) {
     fileInputRef.current.click();
   };
 
-  // 2. Теперь эти функции переключают экраны
   const handleEdit = () => {
     setActiveView('edit');
   };
@@ -188,7 +177,6 @@ export default function ProfileScreen({ userData }) {
     setActiveView('settings');
   };
 
-  // 3. Логика отображения: если мы не в 'main', показываем соответствующий экран
   if (activeView === 'edit') {
     return <ProfileEditScreen onBack={() => setActiveView('main')} data={data} />;
   }
@@ -197,7 +185,6 @@ export default function ProfileScreen({ userData }) {
     return <SettingsScreen onBack={() => setActiveView('main')} />;
   }
 
-  // Твой основной код экрана профиля остается без изменений
   return (
     <div className={styles.profileContainer}>
       {}
@@ -214,17 +201,12 @@ export default function ProfileScreen({ userData }) {
         <img src="/assets/polydate.svg" alt="POLY DATE" className={styles.logo} />
       </header>
 
-      <div className={styles.cardArea}>
+      <div className={styles.cardArea} onClick={() => setShowGallery(true)} style={{ cursor: 'pointer' }}>
         <img src={data.photos[0]} alt="аватарка" className={styles.avatar} />
         <h3>{data.name}</h3>
         <p className={styles.profileLabel}>Профиль</p>
       </div>
-
       <div className={styles.profileButtons}>
-        {/* <button className={styles.btnIcon} onClick={handleChoosePhoto}>
-          <img src="/assets/camera.svg" alt="фото" className={styles.btnImg} />
-          <span>Выбрать фото</span>
-        </button> */}
         <button className={styles.btnIcon} onClick={() => setShowGallery(true)}>
           <img src="/assets/camera.svg" alt="фото" className={styles.btnImg} />
           <span>Выбрать фото</span>

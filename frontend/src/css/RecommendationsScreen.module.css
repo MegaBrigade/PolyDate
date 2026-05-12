@@ -186,3 +186,18 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+.card {
+  aspect-ratio: 3 / 4;  
+  margin: 0 20px 20px 20px;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #f0f0f0;
+  max-height: calc(100vh - 140px);
+}
+
+@media (min-width: 600px) {
+  .card {
+    aspect-ratio: 4 / 3;
+  }
+}

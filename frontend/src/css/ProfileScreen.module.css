@@ -342,3 +342,8 @@
   color: white;
   font-size: 18px;
 }
+.avatarWrapper {
+  display: block;
+  margin: 0 auto;
+  width: fit-content;
+}
