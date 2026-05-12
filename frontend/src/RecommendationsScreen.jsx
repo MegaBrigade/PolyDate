@@ -145,7 +145,7 @@
 //   );
 // }
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useLayoutEffect } from 'react';
 import styles from './css/RecommendationsScreen.module.css';
 
 export default function RecommendationsScreen({ profiles, currentIndex, onNextProfile, onMatch, onOpenProfile }) {
@@ -184,18 +184,17 @@ export default function RecommendationsScreen({ profiles, currentIndex, onNextPr
     }
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setCurrentPhoto(0);
   }, [currentIndex]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const parent = document.querySelector('.app-main');
     if (parent) parent.style.overflowY = 'hidden';
     return () => {
       if (parent) parent.style.overflowY = 'auto';
     };
   }, []);
-
   return (
     <div className={styles.container}>
       <header className={styles.header}>
