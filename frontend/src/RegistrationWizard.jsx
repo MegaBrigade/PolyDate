@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import '../css/registration.css'; 
 import Test from './Test';
-export default function RegistrationWizard() {
+export default function RegistrationWizard({ onComplete })  {
   const [step, setStep] = useState(0);
   const [userData, setUserData] = useState({
     name: '',
@@ -66,8 +66,18 @@ export default function RegistrationWizard() {
     "садоводство", "сериалы", "сноуборд", "собаки", "спорт", "танцы", "театр", "теннис", "трекинг",
     "туризм", "фитнес", "фортепиано", "фотография", "футбол", "хендмейд", "хоккей", "шахматы"
   ];
+  // if (showTest) {
+  //   return <Test onFinish={() => setShowTest(false)} />;
+  // }
   if (showTest) {
-    return <Test onFinish={() => setShowTest(false)} />;
+    return (
+      <Test
+        onFinish={() => {
+          setShowTest(false);
+          onComplete();   // уведомить App, что регистрация завершена
+        }}
+      />
+    );
   }
   return (
     <div className="main-container">
@@ -208,4 +218,5 @@ export default function RegistrationWizard() {
       </div>
     </div>
   );
+
 }

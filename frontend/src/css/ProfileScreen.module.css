@@ -1,0 +1,349 @@
+
+.profileContainer {
+  height: 100vh;
+  overflow-y: auto;
+  padding: 20px;
+  background-color: #fff;
+  font-family: 'Gilroy-ExtraBold', system-ui, sans-serif;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.cardArea {
+  background: white;
+  border-radius: 24px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.cardArea img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 16px;
+}
+.cardArea h3 {
+  margin: 8px 0;
+}
+.profileButtons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.profileButtons button {
+  flex: 1;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 40px;
+  padding: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.textMenu p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: #f9f9f9;
+  padding: 16px;
+  border-radius: 20px;
+  justify-content: center;
+}
+.textMenu span {
+  background: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-family: 'Gilroy-Light', sans-serif;
+}
+.menuSection {
+  margin-top: 24px;
+  width: 100%;
+}
+
+.menuTitle {
+  font-family: 'Gilroy-ExtraBold', sans-serif;
+  font-size: 18px;
+  color: #383436;
+  margin-bottom: 12px;
+  padding-left: 10px;
+}
+
+.menuList {
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 8px 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid #F5F5F5;
+  cursor: pointer;
+}
+
+.menuItem:last-child {
+  border-bottom: none;
+}
+
+.menuLeft, .menuRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menuIcon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.menuLabel {
+  font-family: 'Gilroy-Light', sans-serif;
+  font-size: 16px;
+  color: #383436;
+}
+
+.menuValue {
+  font-family: 'Gilroy-ExtraBold', sans-serif;
+  font-size: 16px;
+  color: #F84CAA;
+}
+
+.arrow {
+  width: 14px;
+  height: 14px;
+  opacity: 0.3;
+}
+
+.cardArea img {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 16px;
+}
+
+.profileLabel {
+  color: #888;
+  font-size: 14px;
+  font-family: 'Gilroy-Light', sans-serif;
+  margin-top: 4px;
+}
+
+.profileButtons {
+  display: flex;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.btnIcon {
+  flex: 1;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 40px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-family: 'Gilroy-Light', sans-serif;
+  font-size: 12px;
+  color: #383436;
+}
+
+.btnImg {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+
+.menuItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 0;
+  border-bottom: 1px solid #F5F5F5;
+  cursor: pointer;
+}
+
+.menuLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menuIcon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.menuLabel {
+  font-family: 'Gilroy-Light', sans-serif;
+  font-size: 16px;
+  color: #383436;
+}
+
+.menuValue {
+  font-family: 'Gilroy-ExtraBold', sans-serif;
+  font-size: 16px;
+  color: #F84CAA;
+  margin-left: 36px;
+}
+
+.bioCard {
+  background: #f9f9f9;
+  border-radius: 20px;
+  padding: 16px;
+  margin-top: 8px;
+  font-family: 'Gilroy-Light', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #383436;
+}
+
+.infoCard {
+  background: #f9f9f9;
+  border-radius: 20px;
+  padding: 8px 0;
+  margin-top: 8px;
+}
+
+.infoItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.infoItem:last-child {
+  border-bottom: none;
+}
+
+.infoIcon {
+  width: 32px;
+  text-align: center;
+}
+
+.infoImg {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.infoContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.infoLabel {
+  font-family: 'Gilroy-ExtraBold', sans-serif;
+  font-size: 14px;
+  color: black;
+}
+
+.infoValue {
+  font-family: 'Gilroy-Light', sans-serif;
+  font-size: 16px;
+  color: #383436;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 4px;
+}
+
+.title {
+  font-size: 28px;
+  font-family: 'Gilroy-ExtraBold', sans-serif;
+  margin: 0;
+}
+
+.logo {
+  width: 80px;
+  height: auto;
+}
+.avatarWrapper {
+  position: relative;
+  display: inline-block;
+  padding: 8px;
+  border: 4px solid #F84CAA; 
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.avatarWrapper:hover {
+  transform: scale(1.05);
+}
+
+.mainAvatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatarBadge {
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #F84CAA;
+  color: white;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+}
+
+
+.photoViewer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: black;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fullPhoto {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+.photoCounter {
+  position: absolute;
+  top: 40px;
+  color: white;
+  font-size: 18px;
+}
+.avatarWrapper {
+  display: block;
+  margin: 0 auto;
+  width: fit-content;
+}

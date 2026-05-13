@@ -1,0 +1,133 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: white;
+  border-radius: 30px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90%;
+  overflow-y: auto;
+  position: relative;
+  animation: fadeInScale 0.2s ease-out;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.closeBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: white;
+  border: none;
+  border-radius: 30px;
+  font-size: 24px;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.photoContainer {
+  position: relative;
+}
+
+.photo {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.photoNav {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 6px 12px;
+  border-radius: 30px;
+  backdrop-filter: blur(4px);
+  z-index: 5;
+}
+.photoNav button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+.photoNav span {
+  color: white;
+  font-size: 14px;
+}
+
+.content {
+  padding: 20px;
+}
+
+.description {
+  font-size: 14px;
+  color: #555;
+  margin: 12px 0;
+  line-height: 1.4;
+}
+
+.details {
+  margin-top: 16px;
+  border-top: 1px solid #eee;
+  padding-top: 16px;
+  font-size: 14px;
+}
+
+.details div {
+  margin-bottom: 8px;
+}
+.modal {
+  width: 95%;
+  max-width: 700px;  
+  max-height: 95%;
+  border-radius: 40px;
+}
+
+.photoContainer {
+  max-height: 60vh;
+  overflow: hidden;
+}
+.photo {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.content {
+  padding: 24px;
+}
+
+.details {
+  font-size: 16px;  
+}

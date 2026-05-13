@@ -95,7 +95,7 @@
     text-align: center;
 }
 
-/* Стили для экрана теста */
+
 .test-scope .registration-screen-quiz .panel {
     justify-content: space-between;
 }
@@ -169,7 +169,7 @@
     margin-top: 20px;
 }
 
-/* Экран результата */
+
 /* .test-scope .registration-screen-result {
     background: linear-gradient(#ffffff 0%, #ff69b4 82%);
     height: 100vh;
@@ -269,7 +269,7 @@
     display: block;
 }
 
-/* Дополнительные правки (из вашего блока) */
+
 .test-scope .main-container {
     max-width: 500px;
     margin: 0 auto;

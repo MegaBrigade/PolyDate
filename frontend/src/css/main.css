@@ -1,0 +1,47 @@
+
+.main-app .bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  background: white;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+  z-index: 100;
+}
+
+.main-app .bottom-nav button {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.main-app .bottom-nav button.active {
+  opacity: 1;
+  color: #ff69b4;
+}
+
+.main-app .app-main {
+  padding-bottom: 70px;
+  height: 100vh;
+  overflow-y: auto;
+}
+.main-app .bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  z-index: 100;
+  border-top: 1px solid #eee;
+}
+.main-app .bottom-nav button.active img {
+  filter: brightness(0) invert(0);
+}
