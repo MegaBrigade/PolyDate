@@ -225,3 +225,11 @@
 .filtersBtn:active {
   transform: scale(0.98);
 }
+
+@media (max-width: 600px) {
+  .filtersBtn {
+    padding: 4px 12px;          
+    font-size: 12px;            
+    border-radius: 30px;
+  }
+}

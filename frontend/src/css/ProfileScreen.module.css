@@ -2,6 +2,8 @@
 .profileContainer {
   height: 100vh;
   overflow-y: auto;
+  padding-bottom: 120px;
+  box-sizing: border-box;
   padding: 20px;
   background-color: #fff;
   font-family: 'Gilroy-ExtraBold', system-ui, sans-serif;
@@ -346,4 +348,15 @@
   display: block;
   margin: 0 auto;
   width: fit-content;
+}
+
+@media (max-width: 600px) {
+  .indicators {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+  }
+  .bar {
+    height: 3px;
+  }
 }

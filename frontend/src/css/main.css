@@ -45,3 +45,8 @@
 .main-app .bottom-nav button.active img {
   filter: brightness(0) invert(0);
 }
+.main-app .app-main {
+  padding-bottom: 80px;  
+  height: 100vh;
+  overflow-y: auto;
+}
