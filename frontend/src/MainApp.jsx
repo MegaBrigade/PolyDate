@@ -154,8 +154,7 @@ export default function MainApp({ userId, onLogout }) {
   });
   const updateFilters = (newFilters) => {
     setFilters(newFilters);
-    // после изменения фильтров можно перезагрузить список кандидатов
-    loadCandidates();
+    loadNextCandidate();
   };
   // ── ProfileModal ───────────────────────────────────────────
   const openProfileModal = (user) => setSelectedProfile(user);
@@ -189,28 +188,11 @@ export default function MainApp({ userId, onLogout }) {
             </div>
           );
         }
-        // return (
-        //   <RecommendationsScreen
-        //     profiles={[feedProfile]}
-        //     currentIndex={0}
-        //     onNextProfile={handleDislike}   // «следующий» без действия
-        //     onMatch={(user) => setMatchData(user)}
-        //     onOpenProfile={openProfileModal}
-        //     onLike={handleLike}
-        //     onDislike={handleDislike}
-        //   />
-        // );
         return (
           <RecommendationsScreen
-            profiles={filteredProfiles}
-            currentIndex={currentProfileIndex}
-            onNextProfile={() => {
-              if (currentProfileIndex + 1 < filteredProfiles.length) {
-                setCurrentProfileIndex(prev => prev + 1);
-              } else {
-                loadCandidates(); // загрузить новую порцию
-              }
-            }}
+            profiles={[feedProfile]}
+            currentIndex={0}
+            onNextProfile={loadNextCandidate}
             onMatch={(user) => setMatchData(user)}
             onOpenProfile={openProfileModal}
             filters={filters}
