@@ -236,6 +236,7 @@ export default function RecommendationsScreen({ profiles, currentIndex, onNextPr
   return (
     <div className={styles.container}>
       <header className={styles.header}>
+        <button className={styles.filtersBtn} onClick={() => setShowFilters(true)}>Фильтры</button>
         <h1 className={styles.title}>Для вас</h1>
         <img src="/assets/polydate.svg" alt="logo" className={styles.logo} />
       </header>
