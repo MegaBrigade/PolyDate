@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styles from './css/SettingsScreen.module.css';
+import TagsSelectionScreen from './TagsSelectionScreen';
 import { updateProfile, clearUserId } from './api';
 
 /**
@@ -13,7 +14,7 @@ import { updateProfile, clearUserId } from './api';
 export default function SettingsScreen({ userData, userId, onBack, onLogout, onProfileUpdate }) {
   const [isVisible, setIsVisible] = useState(userData?.is_visible ?? true);
   const [savingVisibility, setSavingVisibility] = useState(false);
-
+  const [showTags, setShowTags] = useState(false);
   const handleVisibilityToggle = async () => {
     const newValue = !isVisible;
     setIsVisible(newValue);
@@ -37,7 +38,23 @@ export default function SettingsScreen({ userData, userId, onBack, onLogout, onP
     clearUserId();
     if (onLogout) onLogout();
   };
-
+  if (showTags) {
+    return (
+      <TagsSelectionScreen
+        initialTags={userData?.tags || []}
+        onSave={async (newTags) => {
+          try {
+            await updateProfile(userId, { tags: newTags });
+            if (onProfileUpdate) onProfileUpdate();
+          } catch (err) {
+            console.error('Ошибка сохранения тегов:', err);
+          }
+          setShowTags(false);
+        }}
+        onBack={() => setShowTags(false)}
+      />
+    );
+  }
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -47,6 +64,9 @@ export default function SettingsScreen({ userData, userId, onBack, onLogout, onP
 
       <div className={styles.menu}>
         {/* Видимость профиля */}
+        <div className={styles.menuItem} onClick={() => setShowTags(true)}>
+          Выбор тегов
+        </div>
         <div className={styles.menuItem} style={{ cursor: 'default' }}>
           <span>Показывать профиль в ленте</span>
           <button
