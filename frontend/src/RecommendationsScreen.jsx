@@ -147,10 +147,11 @@
 
 import React, { useState, useLayoutEffect } from 'react';
 import styles from './css/RecommendationsScreen.module.css';
-
-export default function RecommendationsScreen({ profiles, currentIndex, onNextProfile, onMatch, onOpenProfile, onLike, onDislike }) {
+import FiltersModal from './FiltersModal';
+export default function RecommendationsScreen({ profiles, currentIndex, onNextProfile, onMatch, onOpenProfile, filters, onUpdateFilters, onLike, onDislike }) {
   const [currentPhoto, setCurrentPhoto] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const user = profiles[currentIndex];
 
   if (!user) return <div className={styles.container}>Нет анкет</div>;
@@ -192,9 +193,12 @@ export default function RecommendationsScreen({ profiles, currentIndex, onNextPr
     }
   };
 
+  // useLayoutEffect(() => {
+  //   setCurrentPhoto(0);
+  // }, [currentIndex]);
   useLayoutEffect(() => {
-    setCurrentPhoto(0);
-  }, [currentIndex]);
+      if (user && user.photos?.length) setCurrentPhoto(0);
+    }, [currentIndex, user]);
 
   useLayoutEffect(() => {
     const parent = document.querySelector('.app-main');
@@ -203,6 +207,32 @@ export default function RecommendationsScreen({ profiles, currentIndex, onNextPr
       if (parent) parent.style.overflowY = 'auto';
     };
   }, []);
+  if (!profiles.length || !user) {
+    return (
+      <div className={styles.container}>
+        <header className={styles.header}>
+          <button className={styles.filtersBtn} onClick={() => setShowFilters(true)}>Фильтры</button>
+          <h1 className={styles.title}>Для вас</h1>
+          <img src="/assets/polydate.svg" alt="logo" className={styles.logo} />
+        </header>
+        <div className={styles.noProfilesMessage}>
+          <p>Нет подходящих анкет.</p>
+          <p>Попробуйте изменить параметры фильтрации.</p>
+          <button className={styles.filtersBtn} onClick={() => setShowFilters(true)}>Открыть фильтры</button>
+        </div>
+        {showFilters && (
+          <FiltersModal
+            filters={filters}
+            onSave={(newFilters) => {
+              onUpdateFilters(newFilters);
+              setShowFilters(false);
+            }}
+            onClose={() => setShowFilters(false)}
+          />
+        )}
+      </div>
+    );
+  }
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -264,6 +294,16 @@ export default function RecommendationsScreen({ profiles, currentIndex, onNextPr
           </div>
         </div>
       </div>
+      {showFilters && (
+        <FiltersModal
+          filters={filters}
+          onSave={(newFilters) => {
+            onUpdateFilters(newFilters);
+            setShowFilters(false);
+          }}
+          onClose={() => setShowFilters(false)}
+        />
+      )}
     </div>
   );
 }

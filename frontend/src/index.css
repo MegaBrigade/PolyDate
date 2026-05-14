@@ -32,7 +32,7 @@ body {
 }
 
 #root {
-    overflow-y: hidden; 
+    overflow-y: auto;
 }
 
 .corner-logo {
@@ -42,4 +42,7 @@ body {
     width: 80px;
     height: auto;
     z-index: 10;
+}
+html, body, #root {
+  overflow-y: auto;  
 }
