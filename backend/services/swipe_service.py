@@ -50,6 +50,23 @@ class SwipeService:
         return result
 
     # ------------------------------------------------------------------
+    # HELPERS
+    # ------------------------------------------------------------------
+    def _mark_as_seen(self, user_id: int, seen_user_id: int):
+        """Добавляем seen_user_id в feed.candidates (список просмотренных)"""
+        try:
+            feed_row = self.db.table('feed').select('candidates').eq('user_id', user_id).execute()
+            if feed_row.data:
+                candidates = feed_row.data[0].get('candidates') or []
+                if seen_user_id not in candidates:
+                    candidates.append(seen_user_id)
+                    self.db.table('feed').update({'candidates': candidates}).eq('user_id', user_id).execute()
+            else:
+                self.db.table('feed').insert({'user_id': user_id, 'candidates': [seen_user_id]}).execute()
+        except Exception as e:
+            logger.warning(f'Could not update feed seen list: {e}')
+
+    # ------------------------------------------------------------------
     # LIKE
     # ------------------------------------------------------------------
     async def like_user(self, user_id: int, liked_user_id: int, compatibility: float) -> Dict:
@@ -103,8 +120,10 @@ class SwipeService:
                 else:
                     match_id = existing.data[0]['id']
 
+                self._mark_as_seen(user_id, liked_user_id)
                 return {'success': True, 'is_match': True, 'match_id': match_id, 'match_user_id': liked_user_id}
 
+            self._mark_as_seen(user_id, liked_user_id)
             return {'success': True, 'is_match': False}
 
         except Exception as e:
@@ -125,6 +144,7 @@ class SwipeService:
             logger.info(f"Dislike: {user_id} → {disliked_user_id}")
         except Exception as e:
             logger.warning(f"Could not record dislike: {e}")
+        self._mark_as_seen(user_id, disliked_user_id)
         return {"success": True}
 
     # ------------------------------------------------------------------
