@@ -1,5 +1,7 @@
 import os
 import logging
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from dotenv import load_dotenv
 from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes
@@ -13,6 +15,24 @@ logger = logging.getLogger(__name__)
 
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 WEBAPP_URL = os.getenv("WEBAPP_URL")
+PORT = int(os.getenv("PORT", 8080))
+
+
+class HealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"ok")
+
+    def log_message(self, format, *args):
+        pass  # заглушаем логи HTTP-сервера
+
+
+def run_health_server():
+    server = HTTPServer(("0.0.0.0", PORT), HealthHandler)
+    logger.info(f"Health server running on port {PORT}")
+    server.serve_forever()
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -23,14 +43,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("Open Dating App", web_app=WebAppInfo(url=WEBAPP_URL))]]
     await update.message.reply_text(welcome, reply_markup=InlineKeyboardMarkup(keyboard))
 
+
 def main():
     if not BOT_TOKEN:
         logger.error("TELEGRAM_BOT_TOKEN not set")
         return
+
+    thread = threading.Thread(target=run_health_server, daemon=True)
+    thread.start()
+
     app = Application.builder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     logger.info("Bot is polling...")
     app.run_polling()
+
 
 if __name__ == "__main__":
     main()
