@@ -1,0 +1,111 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: white;
+  border-radius: 28px;
+  padding: 24px;
+  width: 90%;
+  max-width: 340px;
+  animation: fadeInScale 0.2s ease-out;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.closeBtn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.title {
+  font-family: 'Gilroy-ExtraBold', sans-serif;
+  font-size: 24px;
+  color: #F84CAA;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.field {
+  margin-bottom: 20px;
+}
+
+.field label {
+  display: block;
+  font-family: 'Gilroy-ExtraBold', sans-serif;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #383436;
+}
+
+.field input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 30px;
+  font-size: 16px;
+}
+
+.genderGroup {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.genderGroup label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: normal;
+}
+
+.saveBtn {
+  background-color: #F84CAA;
+  color: white;
+  border: none;
+  border-radius: 40px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
+}
+.filtersBtn {
+  background: none;
+  border: 1px solid #F84CAA;
+  border-radius: 30px;
+  padding: 6px 16px;
+  font-family: 'Gilroy-ExtraBold', sans-serif;
+  font-size: 14px;
+  color: #F84CAA;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.filtersBtn:hover {
+  background: #F84CAA;
+  color: white;
+}
