@@ -34,7 +34,6 @@ export default function ProfileEditScreen({ data, userId, onBack, onSave }) {
     <div className={styles.editContainer}>
       <div className={styles.editHeader}>
         <button onClick={onBack} className={styles.backBtn}>←</button>
-        <h2>Редактирование</h2>
         <button onClick={handleSave} className={styles.saveBtn} disabled={saving}>
           {saving ? '…' : 'Готово'}
         </button>

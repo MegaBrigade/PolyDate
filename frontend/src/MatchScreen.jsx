@@ -25,7 +25,7 @@ export default function MatchScreen({ matchUser, onClose, currentUserPhoto }) {
 
 
       <p className={styles.description}>
-        Собеседник уже ждет знакомства.<br/>Откройте контакты собеседника и сделайте первый шаг.<br/>Кто знает, возможно, это начало чего-то большого?
+        Собеседник уже ждет знакомства.<br/>Откройте контакты собеседника и сделайте первый шаг.
       </p>
 
       <div className={styles.usernameFrame}>{user.name}</div>

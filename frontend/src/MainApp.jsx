@@ -32,7 +32,10 @@ export default function MainApp({ userId, onLogout }) {
 
   // ── Профиль текущего юзера ─────────────────────────────────
   const [myProfile, setMyProfile] = useState(null);
-
+  // ── Фильтры ─────────────────────────────────
+  const [profiles, setProfiles] = useState([]);       // весь список кандидатов
+  const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
+  const [filters, setFilters] = useState({ minAge: 18, maxAge: 100, gender: 'all' });
   // ── Загрузка следующей анкеты из ленты ─────────────────────
   const loadNextCandidate = useCallback(async () => {
     if (!userId) return;
@@ -143,7 +146,17 @@ export default function MainApp({ userId, onLogout }) {
       console.error('Ошибка дизлайка:', err);
     }
   };
-
+  //  ── Вычисление отфильтрованных профилей ───────────────────────────────────────────
+  const filteredProfiles = profiles.filter(profile => {
+    if (profile.age < filters.minAge || profile.age > filters.maxAge) return false;
+    if (filters.gender !== 'all' && profile.gender !== filters.gender) return false;
+    return true;
+  });
+  const updateFilters = (newFilters) => {
+    setFilters(newFilters);
+    // после изменения фильтров можно перезагрузить список кандидатов
+    loadCandidates();
+  };
   // ── ProfileModal ───────────────────────────────────────────
   const openProfileModal = (user) => setSelectedProfile(user);
   const closeProfileModal = () => setSelectedProfile(null);
@@ -176,13 +189,32 @@ export default function MainApp({ userId, onLogout }) {
             </div>
           );
         }
+        // return (
+        //   <RecommendationsScreen
+        //     profiles={[feedProfile]}
+        //     currentIndex={0}
+        //     onNextProfile={handleDislike}   // «следующий» без действия
+        //     onMatch={(user) => setMatchData(user)}
+        //     onOpenProfile={openProfileModal}
+        //     onLike={handleLike}
+        //     onDislike={handleDislike}
+        //   />
+        // );
         return (
           <RecommendationsScreen
-            profiles={[feedProfile]}
-            currentIndex={0}
-            onNextProfile={handleDislike}   // «следующий» без действия
+            profiles={filteredProfiles}
+            currentIndex={currentProfileIndex}
+            onNextProfile={() => {
+              if (currentProfileIndex + 1 < filteredProfiles.length) {
+                setCurrentProfileIndex(prev => prev + 1);
+              } else {
+                loadCandidates(); // загрузить новую порцию
+              }
+            }}
             onMatch={(user) => setMatchData(user)}
             onOpenProfile={openProfileModal}
+            filters={filters}
+            onUpdateFilters={updateFilters}
             onLike={handleLike}
             onDislike={handleDislike}
           />

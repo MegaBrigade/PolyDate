@@ -13,12 +13,18 @@
 }
 
 .backBtn {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #383436;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
 }
-
 .menu {
     display: flex;
     flex-direction: column;
