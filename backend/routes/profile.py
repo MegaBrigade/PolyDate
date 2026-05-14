@@ -172,6 +172,52 @@ async def upload_photo(
         )
 
 
+@router.delete("/{user_id}/photos/{photo_id}")
+async def delete_photo(
+        user_id: int,
+        photo_id: int,
+        db: Client = Depends(get_db)
+):
+    """Delete a photo from user profile"""
+    try:
+        # Verify photo belongs to this user
+        photo_resp = db.table('photos').select('id, url, user_id').eq('id', photo_id).eq('user_id', user_id).execute()
+        if not photo_resp.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Photo not found or does not belong to this user"
+            )
+
+        photo = photo_resp.data[0]
+
+        # Extract storage path from URL (everything after /profile-photos/)
+        try:
+            url = photo['url']
+            storage_path_marker = '/profile-photos/'
+            if storage_path_marker in url:
+                storage_path = url.split(storage_path_marker, 1)[1].split('?')[0]
+                db.storage.from_('profile-photos').remove([storage_path])
+                logger.info(f"Deleted from storage: {storage_path}")
+        except Exception as storage_err:
+            logger.warning(f"Could not delete from storage: {storage_err}")
+            # Continue — still remove the DB record
+
+        # Delete from DB
+        db.table('photos').delete().eq('id', photo_id).execute()
+        logger.info(f"Photo {photo_id} deleted for user {user_id}")
+
+        return {"success": True, "deleted_id": photo_id}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting photo: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete photo"
+        )
+
+
 @router.post("/{user_id}/test-results")
 async def save_test_results(
         user_id: int,

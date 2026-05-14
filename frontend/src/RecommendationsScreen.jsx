@@ -148,7 +148,7 @@
 import React, { useState, useLayoutEffect } from 'react';
 import styles from './css/RecommendationsScreen.module.css';
 
-export default function RecommendationsScreen({ profiles, currentIndex, onNextProfile, onMatch, onOpenProfile }) {
+export default function RecommendationsScreen({ profiles, currentIndex, onNextProfile, onMatch, onOpenProfile, onLike, onDislike }) {
   const [currentPhoto, setCurrentPhoto] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const user = profiles[currentIndex];
@@ -176,11 +176,19 @@ export default function RecommendationsScreen({ profiles, currentIndex, onNextPr
   };
 
   const handleAction = (type) => {
-    if (type === 'like' && user.isMutual) {
-      onMatch(user);
-      onNextProfile();
+    if (type === 'like') {
+      if (onLike) {
+        onLike();
+      } else {
+        if (user.isMutual) onMatch(user);
+        onNextProfile();
+      }
     } else {
-      onNextProfile();
+      if (onDislike) {
+        onDislike();
+      } else {
+        onNextProfile();
+      }
     }
   };
 

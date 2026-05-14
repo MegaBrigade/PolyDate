@@ -1,263 +1,142 @@
-// import React, { useRef } from 'react';
-// import styles from './css/ProfileScreen.module.css';
-
-// export default function ProfileScreen({ userData }) {
-//   const fileInputRef = useRef(null);
-
-//   const mockUser = {
-//     name: 'Иван',
-//     age: 27,
-//     city: 'Москва',
-//     height: 180,
-//     education: 'Высшее',
-//     bio: 'Люблю путешествия и кофе. Ищу человека для долгих отношений.',
-//     photos: ['/assets/photo-anna.svg']
-//   };
-  
-//   const data = userData || mockUser;
-
-//   const handleChoosePhoto = () => {
-//     fileInputRef.current.click();
-//   };
-
-//   const handleEdit = () => {
-//     alert("Открытие экрана редактирования...");
-//   };
-
-//   const handleSettings = () => {
-//     alert("Открытие настроек...");
-//   };
-
-//   return (
-//     <div className={styles.profileContainer}>
-//       {}
-//       <input 
-//         type="file" 
-//         ref={fileInputRef} 
-//         style={{ display: 'none' }} 
-//         accept="image/*"
-//         onChange={(e) => console.log("Файл выбран:", e.target.files[0])}
-//       />
-
-//       <header className={styles.header}>
-//         <h1 className={styles.title}>Профиль</h1>
-//         <img src="/assets/polydate.svg" alt="POLY DATE" className={styles.logo} />
-//       </header>
-
-//       <div className={styles.cardArea}>
-//         <img src={data.photos[0]} alt="аватарка" className={styles.avatar} />
-//         <h3>{data.name}</h3>
-//         <p className={styles.profileLabel}>Профиль</p>
-//       </div>
-
-//       <div className={styles.profileButtons}>
-//         <button className={styles.btnIcon} onClick={handleChoosePhoto}>
-//           <img src="/assets/camera.svg" alt="фото" className={styles.btnImg} />
-//           <span>Выбрать фото</span>
-//         </button>
-//         <button className={styles.btnIcon} onClick={handleEdit}>
-//           <img src="/assets/changing.svg" alt="ред" className={styles.btnImg} />
-//           <span>Изменить</span>
-//         </button>
-//         <button className={styles.btnIcon} onClick={handleSettings}>
-//           <img src="/assets/properties.svg" alt="настр" className={styles.btnImg} />
-//           <span>Настройки</span>
-//         </button>
-//       </div>
-
-//       <div className={styles.menuSection}>
-//         <h3 className={styles.menuTitle}>Основные</h3>
-//         <div className={styles.infoCard}>
-//           <div className={styles.infoItem}>
-//             <div className={styles.infoIcon}>
-//               <img src="/assets/city.svg" alt="" className={styles.infoImg} />
-//             </div>
-//             <div className={styles.infoContent}>
-//               <span className={styles.infoLabel}>Город</span>
-//               <span className={styles.infoValue}>{data.city}</span>
-//             </div>
-//           </div>
-//           <div className={styles.infoItem}>
-//             <div className={styles.infoIcon}>
-//               <img src="/assets/bandage-outline.svg" alt="" className={styles.infoImg} />
-//             </div>
-//             <div className={styles.infoContent}>
-//               <span className={styles.infoLabel}>Возраст</span>
-//               <span className={styles.infoValue}>{data.age} лет</span>
-//             </div>
-//           </div>
-//           <div className={styles.infoItem}>
-//             <div className={styles.infoIcon}>
-//               <img src="/assets/book.svg" alt="" className={styles.infoImg} />
-//             </div>
-//             <div className={styles.infoContent}>
-//               <span className={styles.infoLabel}>Образование</span>
-//               <span className={styles.infoValue}>{data.education}</span>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
 import React, { useRef, useState } from 'react';
 import styles from './css/ProfileScreen.module.css';
-
 import ProfileEditScreen from './ProfileEditScreen';
 import SettingsScreen from './SettingsScreen';
 import PhotoGalleryScreen from './PhotoGalleryScreen';
-export default function ProfileScreen({ userData }) {
+
+// FIX: принимаем userId, onProfileUpdate и onLogout из MainApp
+export default function ProfileScreen({ userData, userId, onProfileUpdate, onLogout }) {
   const fileInputRef = useRef(null);
-  
   const [activeView, setActiveView] = useState('main');
-
-  const mockUser = {
-    name: 'Иван',
-    age: 27,
-    city: 'Москва',
-    height: 180,
-    education: 'Высшее',
-    bio: 'Люблю путешествия и кофе. Ищу человека для долгих отношений.',
-    photos: ['/assets/photo-anna.svg']
-  };
-  
-  const data = userData || mockUser;
   const [showGallery, setShowGallery] = useState(false);
-  const handleAvatarClick = () => {
-    setShowGallery(true);
-  };
-  const handleAddPhoto = () => {
-    fileInputRef.current.click();
-  };
 
-  const onFileChange = (e) => {
-    if (e.target.files[0]) {
-      // Здесь будет логика загрузки фото на сервер
-      console.log("Файл выбран:", e.target.files[0]);
-    }
+  const data = userData || {
+    name: 'Загрузка…',
+    age: '',
+    city: '',
+    bio: '',
+    photos: [],
+    tags: [],
+    is_visible: true,
   };
 
-  // В JSX, в блоке с аватаром добавляем onClick
-  // <div className={styles.avatarWrapper} onClick={handleAvatarClick}>
-  //   <img src={data.photos[0]} alt="аватарка" className={styles.mainAvatar} />
-  //   <div className={styles.avatarBadge}>Фото</div>
-  // </div>
+  // photos — [{id, url}] или fallback
+  const photoObjects = Array.isArray(data.photos) && data.photos.length > 0
+    ? data.photos
+    : [{ id: null, url: '/assets/profile-photo.svg' }];
 
-  // Условный рендеринг галереи
-  // if (showGallery) {
-  //   return (
-  //     <PhotoGalleryScreen
-  //       photos={data.photos}
-  //       onBack={() => setShowGallery(false)}
-  //       onAddPhoto={handleAddPhoto}
-  //     />
-  //   );
-  // }
+  const avatarUrl = photoObjects[0]?.url ?? '/assets/profile-photo.svg';
+
   if (showGallery) {
     return (
       <PhotoGalleryScreen
-        photos={data.photos}
+        photos={photoObjects}
+        userId={userId}
         onBack={() => setShowGallery(false)}
-        onSave={(updatedPhotos) => {
-          console.log('Новый список фото:', updatedPhotos);
+        onSave={() => {
+          if (onProfileUpdate) onProfileUpdate();
           setShowGallery(false);
         }}
       />
     );
   }
-  const handleChoosePhoto = () => {
-    fileInputRef.current.click();
-  };
-
-  const handleEdit = () => {
-    setActiveView('edit');
-  };
-
-  const handleSettings = () => {
-    setActiveView('settings');
-  };
 
   if (activeView === 'edit') {
-    return <ProfileEditScreen onBack={() => setActiveView('main')} data={data} />;
+    return (
+      <ProfileEditScreen
+        data={data}
+        userId={userId}
+        onBack={() => setActiveView('main')}
+        onSave={() => {
+          if (onProfileUpdate) onProfileUpdate();
+        }}
+      />
+    );
   }
 
   if (activeView === 'settings') {
-    return <SettingsScreen onBack={() => setActiveView('main')} />;
+    return (
+      <SettingsScreen
+        userData={data}
+        userId={userId}
+        onBack={() => setActiveView('main')}
+        onLogout={onLogout}
+        onProfileUpdate={onProfileUpdate}
+      />
+    );
   }
 
   return (
     <div className={styles.profileContainer}>
-      {}
-      <input 
-        type="file" 
-        ref={fileInputRef} 
-        style={{ display: 'none' }} 
-        accept="image/*"
-        onChange={(e) => console.log("Файл выбран:", e.target.files[0])}
-      />
-
       <header className={styles.header}>
         <h1 className={styles.title}>Профиль</h1>
         <img src="/assets/polydate.svg" alt="POLY DATE" className={styles.logo} />
       </header>
 
       <div className={styles.cardArea} onClick={() => setShowGallery(true)} style={{ cursor: 'pointer' }}>
-        <img src={data.photos[0]} alt="аватарка" className={styles.avatar} />
+        <img src={avatarUrl} alt="аватарка" className={styles.avatar} />
         <h3>{data.name}</h3>
         <p className={styles.profileLabel}>Профиль</p>
       </div>
+
       <div className={styles.profileButtons}>
         <button className={styles.btnIcon} onClick={() => setShowGallery(true)}>
           <img src="/assets/camera.svg" alt="фото" className={styles.btnImg} />
           <span>Выбрать фото</span>
         </button>
-        <button className={styles.btnIcon} onClick={handleEdit}>
+        <button className={styles.btnIcon} onClick={() => setActiveView('edit')}>
           <img src="/assets/changing.svg" alt="ред" className={styles.btnImg} />
           <span>Изменить</span>
         </button>
-        <button className={styles.btnIcon} onClick={handleSettings}>
+        <button className={styles.btnIcon} onClick={() => setActiveView('settings')}>
           <img src="/assets/properties.svg" alt="настр" className={styles.btnImg} />
           <span>Настройки</span>
         </button>
       </div>
-      <div className={styles.menuSection}>
-        <h3 className={styles.menuTitle}>О себе</h3>
-        <div className={styles.bioCard}>
-          <p>{data.bio}</p>
+
+      {data.bio && (
+        <div className={styles.menuSection}>
+          <h3 className={styles.menuTitle}>О себе</h3>
+          <div className={styles.bioCard}>
+            <p>{data.bio}</p>
+          </div>
         </div>
-      </div>
+      )}
+
       <div className={styles.menuSection}>
         <h3 className={styles.menuTitle}>Основные</h3>
         <div className={styles.infoCard}>
           <div className={styles.infoItem}>
-            <div className={styles.infoIcon}>
-              <img src="/assets/city.svg" alt="" className={styles.infoImg} />
-            </div>
+            <div className={styles.infoIcon}><img src="/assets/city.svg" alt="" className={styles.infoImg} /></div>
             <div className={styles.infoContent}>
               <span className={styles.infoLabel}>Город</span>
-              <span className={styles.infoValue}>{data.city}</span>
+              <span className={styles.infoValue}>{data.city || '—'}</span>
             </div>
           </div>
           <div className={styles.infoItem}>
-            <div className={styles.infoIcon}>
-              <img src="/assets/bandage-outline.svg" alt="" className={styles.infoImg} />
-            </div>
+            <div className={styles.infoIcon}><img src="/assets/bandage-outline.svg" alt="" className={styles.infoImg} /></div>
             <div className={styles.infoContent}>
               <span className={styles.infoLabel}>Возраст</span>
-              <span className={styles.infoValue}>{data.age} лет</span>
-            </div>
-          </div>
-          <div className={styles.infoItem}>
-            <div className={styles.infoIcon}>
-              <img src="/assets/book.svg" alt="" className={styles.infoImg} />
-            </div>
-            <div className={styles.infoContent}>
-              <span className={styles.infoLabel}>Образование</span>
-              <span className={styles.infoValue}>{data.education}</span>
+              <span className={styles.infoValue}>{data.age ? `${data.age} лет` : '—'}</span>
             </div>
           </div>
         </div>
       </div>
+
+      {data.tags && data.tags.length > 0 && (
+        <div className={styles.menuSection}>
+          <h3 className={styles.menuTitle}>Интересы</h3>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '0 4px' }}>
+            {data.tags.map(tag => (
+              <span key={tag} style={{
+                background: '#2a2a2a', color: '#fff', padding: '4px 12px',
+                borderRadius: '16px', fontSize: '13px'
+              }}>{tag}</span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

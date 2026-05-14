@@ -1,169 +1,208 @@
-
-
-// import React, { useState } from 'react';
-// import BottomNavBar from './BottomNavBar';
-// import RecommendationsScreen from './RecommendationsScreen';
-// import ProfileScreen from './ProfileScreen';
-// import LikesScreen from './LikesScreen';
-// import MatchScreen from './MatchScreen';
-// import './css/main.css';
-
-// export default function MainApp() {
-//   const [activeTab, setActiveTab] = useState('recommendations');
-//   const [matchData, setMatchData] = useState(null);
-
-//   const showMatch = (user) => setMatchData(user);
-//   const hideMatch = () => setMatchData(null);
-
-//   const renderContent = () => {
-//     switch (activeTab) {
-//       case 'recommendations':
-//         return <RecommendationsScreen onMatch={showMatch} />;
-//       case 'profile':
-//         return <ProfileScreen />;
-//       case 'matches':
-//         // return <LikesScreen />; 
-//         return <LikesScreen onMatch={showMatch} />;
-//       default:
-//         return <RecommendationsScreen onMatch={showMatch} />;
-//     }
-//   };
-
-//   return (
-//     <div className="main-app">
-//       {matchData ? (
-//         <MatchScreen matchUser={matchData} onClose={hideMatch} />
-//       ) : (
-//         <>
-//           <div className="app-main">{renderContent()}</div>
-//           <BottomNavBar activeTab={activeTab} onTabChange={setActiveTab} />
-//         </>
-//       )}
-//     </div>
-//   );
-// }
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import BottomNavBar from './BottomNavBar';
 import RecommendationsScreen from './RecommendationsScreen';
 import ProfileScreen from './ProfileScreen';
 import LikesScreen from './LikesScreen';
 import MatchScreen from './MatchScreen';
-import './css/main.css';
 import ProfileModal from './ProfileModal';
-const mockProfiles = [
-  {
-    id: 1,
-    name: 'Анна',
-    age: 25,
-    bio: 'Люблю путешествия и кофе. Ищу человека, с которым можно разделить рассветы.',
-    photos: ['/assets/photo-anna.svg', '/assets/photo-anna.svg', '/assets/photo-anna.svg'],
-    city: 'Москва',
-    education: 'Высшее',
-    height: 170,
-    compatibility: 90,
-    isMutual: true
-  },
-  {
-    id: 2,
-    name: 'Мария',
-    age: 28,
-    bio: 'Архитектор. Верю в минимализм и искренность.',
-    photos: ['/assets/photo-anna.svg'],
-    city: 'Санкт-Петербург',
-    education: 'Среднее специальное',
-    height: 165,
-    compatibility: 75,
-    isMutual: false
-  },
-];
+import './css/main.css';
+import {
+  getNextCandidate,
+  getWhoLikedMe,
+  likeUser,
+  dislikeUser,
+  getProfile,
+  normalizeCandidate,
+  normalizeProfile,
+} from './api';
 
-const mockLikes = [
-  {
-    id: 1,
-    name: 'Малышка',
-    age: 21,
-    compatibility: 95,
-    description: 'Я верю, что где-то в этом шумном мире живет тихое счастье...',
-    photos: ['/assets/photo-anna.svg','/assets/5380084942638880566.jpg','/assets/photo-anna.svg'],
-    liked: false
-  },
-  {
-    id: 2,
-    name: 'Тимофей Барсов',
-    age: 22,
-    compatibility: 90,
-    description: 'Люблю белые ночи, какао с кокосовым сиропом и желтый макияж.',
-    photos: ['/assets/photo-anna.svg','/assets/5380084942638880566.jpg','/assets/photo-anna.svg'],
-    liked: false
-  },
-  {
-    id: 3,
-    name: 'Евгений Негролов',
-    age: 22,
-    compatibility: 90,
-    description: 'Ищу девушек без паспорта',
-    photos: ['/assets/5469930019179139532.jpg','/assets/5380084942638880566.jpg','/assets/photo-anna.svg'],
-    liked: false
-  }
-];
-
-export default function MainApp() {
-  
+export default function MainApp({ userId, onLogout }) {
   const [activeTab, setActiveTab] = useState('recommendations');
   const [matchData, setMatchData] = useState(null);
-
-  const [profiles, setProfiles] = useState(mockProfiles);
-  const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
-
-  const [likes, setLikes] = useState(mockLikes);
   const [selectedProfile, setSelectedProfile] = useState(null);
-  const openProfileModal = (user) => setSelectedProfile(user);
-  const closeProfileModal = () => setSelectedProfile(null);
-  const showMatch = (user) => setMatchData(user);
-  const hideMatch = () => setMatchData(null);
 
-  const nextProfile = () => {
-    if (currentProfileIndex + 1 < profiles.length) {
-      setCurrentProfileIndex(prev => prev + 1);
-    } else {
-      alert('Анкеты закончились');
+  // ── Лента рекомендаций ──────────────────────────────────────
+  const [feedProfile, setFeedProfile] = useState(null);   // текущая анкета в ленте
+  const [feedLoading, setFeedLoading] = useState(false);
+  const [feedEmpty, setFeedEmpty] = useState(false);
+
+  // ── Лайки ──────────────────────────────────────────────────
+  const [likes, setLikes] = useState([]);
+  const [likesLoading, setLikesLoading] = useState(false);
+
+  // ── Профиль текущего юзера ─────────────────────────────────
+  const [myProfile, setMyProfile] = useState(null);
+
+  // ── Загрузка следующей анкеты из ленты ─────────────────────
+  const loadNextCandidate = useCallback(async () => {
+    if (!userId) return;
+    setFeedLoading(true);
+    try {
+      const res = await getNextCandidate(userId);
+      if (res.candidate) {
+        setFeedProfile(normalizeCandidate(res.candidate));
+        setFeedEmpty(false);
+      } else {
+        setFeedProfile(null);
+        setFeedEmpty(true);
+      }
+    } catch (err) {
+      console.error('Ошибка загрузки ленты:', err);
+      setFeedProfile(null);
+      setFeedEmpty(true);
+    } finally {
+      setFeedLoading(false);
+    }
+  }, [userId]);
+
+  // ── Загрузка списка лайков ─────────────────────────────────
+  const loadLikes = useCallback(async () => {
+    if (!userId) return;
+    setLikesLoading(true);
+    try {
+      const res = await getWhoLikedMe(userId);
+      const normalized = (res.users ?? []).map(u => normalizeCandidate(u));
+      setLikes(normalized);
+    } catch (err) {
+      console.error('Ошибка загрузки лайков:', err);
+    } finally {
+      setLikesLoading(false);
+    }
+  }, [userId]);
+
+  // ── Загрузка профиля текущего пользователя ─────────────────
+  const loadMyProfile = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const raw = await getProfile(userId);
+      setMyProfile(normalizeProfile(raw));
+    } catch (err) {
+      console.error('Ошибка загрузки профиля:', err);
+    }
+  }, [userId]);
+
+  // ── Начальная загрузка ─────────────────────────────────────
+  useEffect(() => {
+    loadNextCandidate();
+    loadMyProfile();
+  }, [loadNextCandidate, loadMyProfile]);
+
+  // Загружаем лайки только при переходе на вкладку
+  useEffect(() => {
+    if (activeTab === 'matches') {
+      loadLikes();
+    }
+  }, [activeTab, loadLikes]);
+
+  // ── Обработчики свайпов ────────────────────────────────────
+  const handleLike = async () => {
+    if (!feedProfile) return;
+    try {
+      const res = await likeUser(userId, feedProfile.id);
+      if (res.is_match) {
+        setMatchData(feedProfile);
+      }
+    } catch (err) {
+      console.error('Ошибка лайка:', err);
+    }
+    loadNextCandidate();
+  };
+
+  const handleDislike = async () => {
+    if (!feedProfile) return;
+    try {
+      await dislikeUser(userId, feedProfile.id);
+    } catch (err) {
+      console.error('Ошибка дизлайка:', err);
+    }
+    loadNextCandidate();
+  };
+
+  // ── Лайк из экрана "Лайки" ─────────────────────────────────
+  const handleLikeInLikes = async (user) => {
+    try {
+      const res = await likeUser(userId, user.id);
+      setLikes(prev =>
+        prev.map(item =>
+          item.id === user.id ? { ...item, liked: true } : item
+        )
+      );
+      if (res.is_match) {
+        setMatchData(user);
+      }
+    } catch (err) {
+      console.error('Ошибка лайка:', err);
     }
   };
 
-  const handleLikeInLikes = (user) => {
-    setLikes(prev => prev.map(item =>
-      item.id === user.id ? { ...item, liked: !item.liked } : item
-    ));
-    showMatch(user);
+  const handleDislikeInLikes = async (id) => {
+    try {
+      await dislikeUser(userId, id);
+      setLikes(prev => prev.filter(item => item.id !== id));
+    } catch (err) {
+      console.error('Ошибка дизлайка:', err);
+    }
   };
 
-  const handleDislikeInLikes = (id) => {
-    setLikes(prev => prev.filter(item => item.id !== id));
-  };
+  // ── ProfileModal ───────────────────────────────────────────
+  const openProfileModal = (user) => setSelectedProfile(user);
+  const closeProfileModal = () => setSelectedProfile(null);
 
+  // ── Контент по вкладкам ────────────────────────────────────
+
+  /**
+   * RecommendationsScreen ожидает:
+   *   profiles[], currentIndex, onNextProfile, onMatch, onOpenProfile
+   *
+   * Мы адаптируем: передаём массив с одним профилем и фиктивный currentIndex=0,
+   * а onNextProfile вызывает loadNextCandidate.
+   */
   const renderContent = () => {
     switch (activeTab) {
-      case 'recommendations':
+      case 'recommendations': {
+        if (feedLoading && !feedProfile) {
+          return (
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%', color:'#fff' }}>
+              Загрузка…
+            </div>
+          );
+        }
+        if (feedEmpty || !feedProfile) {
+          return (
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'center',
+              height:'100%', color:'#fff', flexDirection:'column', gap:'12px', padding:'24px', textAlign:'center' }}>
+              <p style={{ fontSize:'20px' }}>🎉</p>
+              <p>Анкеты закончились. Загляни позже!</p>
+            </div>
+          );
+        }
         return (
           <RecommendationsScreen
-            profiles={profiles}
-            currentIndex={currentProfileIndex}
-            onNextProfile={nextProfile}
-            onMatch={showMatch}
+            profiles={[feedProfile]}
+            currentIndex={0}
+            onNextProfile={handleDislike}   // «следующий» без действия
+            onMatch={(user) => setMatchData(user)}
             onOpenProfile={openProfileModal}
+            onLike={handleLike}
+            onDislike={handleDislike}
           />
         );
+      }
+
       case 'profile':
-        return <ProfileScreen />;
+        return <ProfileScreen userId={userId} userData={myProfile} onProfileUpdate={loadMyProfile} onLogout={onLogout} />;
+
       case 'matches':
         return (
           <LikesScreen
             likes={likes}
+            loading={likesLoading}
             onLike={handleLikeInLikes}
             onDislike={handleDislikeInLikes}
             onOpenProfile={openProfileModal}
           />
         );
+
       default:
         return null;
     }
@@ -172,14 +211,16 @@ export default function MainApp() {
   return (
     <div className="main-app">
       {matchData ? (
-        <MatchScreen matchUser={matchData} onClose={hideMatch} />
+        <MatchScreen matchUser={matchData} onClose={() => setMatchData(null)} />
       ) : (
         <>
           <div className="app-main">{renderContent()}</div>
           <BottomNavBar activeTab={activeTab} onTabChange={setActiveTab} />
         </>
       )}
-      {selectedProfile && <ProfileModal user={selectedProfile} onClose={closeProfileModal} />}
+      {selectedProfile && (
+        <ProfileModal user={selectedProfile} onClose={closeProfileModal} />
+      )}
     </div>
   );
 }

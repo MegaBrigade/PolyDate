@@ -1,20 +1,24 @@
 from datetime import datetime
-from typing import Optional, List
-from pydantic import BaseModel, EmailStr
+from typing import Optional
+from pydantic import BaseModel
+
 
 class User(BaseModel):
-    id: int  # Telegram ID
-    username: str
-    first_name: str
-    age: int
-    country: str
-    city: str
+    """Отражает реальную схему таблицы users в Supabase"""
+    id: int                              # Telegram ID (PK)
+    username: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    gender: Optional[str] = None
+    age: Optional[int] = None
+    country: Optional[str] = None
+    city: Optional[str] = None
     bio: Optional[str] = None
-    latitude: float
-    longitude: float
-    location_radius: float = 50.0
-    gender: str  # 'm', 'f', 'other'
-    created_at: datetime
-    updated_at: datetime
-    deleted_at: Optional[datetime] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    location_radius: Optional[int] = None
     is_visible: bool = True
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    deleted_at: Optional[datetime] = None
+    test_results: Optional[dict] = None  # JSONB: OCEAN-результаты теста

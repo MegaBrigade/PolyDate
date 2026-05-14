@@ -115,9 +115,12 @@ class ModerationService:
 
             if moderation_result['approved']:
                 logger.info(f"✅ Photo approved for user {user_id}")
+                photo_id = response.data[0]['id'] if response.data else None
                 return {
                     'success': True,
-                    'photo_id': response.data[0]['id'] if response.data else None,
+                    'photo_id': photo_id,
+                    'id': photo_id,
+                    'url': image_url,
                     'message': 'Photo uploaded and approved'
                 }
             else:

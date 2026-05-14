@@ -7,26 +7,17 @@ logger = logging.getLogger(__name__)
 
 
 class RecommendationService:
-    """Generates personalized feed based on location, tags, and compatibility"""
+    """Генерирует ленту на основе геолокации, тегов и совместимости"""
 
     def __init__(self, db: Client):
         self.db = db
 
     def haversine_distance(self, lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-        """
-        Calculate distance between two coordinates in kilometers
-        """
-        R = 6371  # Earth's radius in km
-
+        R = 6371
         lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
-
-        dlat = lat2 - lat1
-        dlon = lon2 - lon1
-
+        dlat, dlon = lat2 - lat1, lon2 - lon1
         a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
-        c = 2 * asin(sqrt(a))
-
-        return R * c
+        return R * 2 * asin(sqrt(a))
 
     async def get_candidates(
             self,
@@ -36,64 +27,78 @@ class RecommendationService:
             age_max: int = None,
             gender_filter: str = None
     ) -> List[dict]:
-        """
-        Get list of candidate profiles based on filters, excluding already swiped users.
-        """
         try:
-            # Get current user info
             user_response = self.db.table('users').select(
-                'latitude, longitude, gender'
+                'latitude, longitude'
             ).eq('id', user_id).execute()
             if not user_response.data:
                 return []
-            user_lat, user_lon = user_response.data[0]['latitude'], user_response.data[0]['longitude']
 
-            # Get all other active users
-            all_users_response = self.db.table('users').select(
-                'id, age, gender, latitude, longitude, is_visible'
+            user_lat = float(user_response.data[0]['latitude'])
+            user_lon = float(user_response.data[0]['longitude'])
+
+            # Получаем всех видимых пользователей кроме себя
+            all_users = self.db.table('users').select(
+                'id, age, latitude, longitude, is_visible'
             ).neq('id', user_id).eq('is_visible', True).execute()
-            if not all_users_response.data:
+
+            if not all_users.data:
                 return []
 
-            # Get all users already swiped (like OR dislike) by current user
-            swiped_response = self.db.table('likes').select('liked_user_id').eq(
-                'user_id', user_id
+            # Кого уже лайкнули (есть в liked_by у других И записи в likes)
+            # В нашей схеме "уже видели" = user_id есть в liked_by КОГО-ТО
+            # Но проще: получаем из feed.candidates уже показанных
+            # Fallback: пока просто исключаем тех, кто уже в matches
+
+            # Получаем матчи — их не показываем
+            matches = self.db.table('matches').select('user1_id, user2_id').or_(
+                f'user1_id.eq.{user_id},user2_id.eq.{user_id}'
             ).execute()
-            swiped_ids = {row['liked_user_id'] for row in swiped_response.data} if swiped_response.data else set()
+            matched_ids = set()
+            for m in (matches.data or []):
+                matched_ids.add(m['user1_id'])
+                matched_ids.add(m['user2_id'])
+            matched_ids.discard(user_id)
+
+            # Получаем тех, кто уже в нашем liked_by (мы их лайкнули)
+            # В likes: строка uid=user_id, liked_by — те кто лайкнул нас
+            # Нам нужно обратное: кого МЫ лайкнули
+            # Это хранится как: наш id есть в liked_by[candidate_id]
+            # Для фильтрации "уже свайпнутых" используем feed таблицу
+            feed_row = self.db.table('feed').select('candidates').eq('user_id', user_id).execute()
+            seen_ids = set()
+            if feed_row.data and feed_row.data[0].get('candidates'):
+                seen_ids = set(feed_row.data[0]['candidates'])
+
+            exclude_ids = matched_ids | seen_ids
 
             candidates = []
-            for other_user in all_users_response.data:
-                if other_user['id'] in swiped_ids:
-                    continue  # Already swiped (liked or disliked)
+            for other in all_users.data:
+                if other['id'] in exclude_ids:
+                    continue
 
-                # Distance filter
+                if other['latitude'] is None or other['longitude'] is None:
+                    continue
+
                 distance = self.haversine_distance(
                     user_lat, user_lon,
-                    other_user['latitude'], other_user['longitude']
+                    float(other['latitude']), float(other['longitude'])
                 )
                 if distance > radius_km:
                     continue
 
-                # Age filter
-                if age_min and other_user['age'] < age_min:
+                if age_min and other.get('age', 0) < age_min:
                     continue
-                if age_max and other_user['age'] > age_max:
-                    continue
-
-                # Gender filter
-                if gender_filter and other_user['gender'] != gender_filter:
+                if age_max and other.get('age', 999) > age_max:
                     continue
 
-                # Get compatibility score (tags + OCEAN)
-                compatibility = await self.calculate_compatibility(user_id, other_user['id'])
-
+                compatibility = await self.calculate_compatibility(user_id, other['id'])
                 candidates.append({
-                    'user_id': other_user['id'],
+                    'user_id': other['id'],
                     'compatibility': compatibility,
-                    'distance': round(distance, 2)
+                    'distance': round(distance, 2),
                 })
 
-            # Sort by compatibility (highest first)
             candidates.sort(key=lambda x: x['compatibility'], reverse=True)
             return candidates
 
@@ -103,58 +108,42 @@ class RecommendationService:
 
     async def calculate_compatibility(self, user_id_a: int, user_id_b: int) -> float:
         """
-        Calculate compatibility percentage (0-100)
-        40% from tags (4% per matching tag, max 5 tags)
-        60% from OCEAN personality test (12% per dimension)
+        0-100%.
+        20% — теги (4% за каждый совпадающий, макс 5)
+        80% — OCEAN из users.test_results JSONB
         """
         try:
-            # Get tags for both users
-            tags_a_response = self.db.table('user_tags').select(
-                'tags(name)'
-            ).eq('user_id', user_id_a).execute()
+            # Теги
+            tags_a = self.db.table('user_tags').select('tags(name)').eq('user_id', user_id_a).execute()
+            tags_b = self.db.table('user_tags').select('tags(name)').eq('user_id', user_id_b).execute()
 
-            tags_b_response = self.db.table('user_tags').select(
-                'tags(name)'
-            ).eq('user_id', user_id_b).execute()
+            set_a = {t['tags']['name'] for t in tags_a.data if t.get('tags')} if tags_a.data else set()
+            set_b = {t['tags']['name'] for t in tags_b.data if t.get('tags')} if tags_b.data else set()
 
-            tags_a = {t['tags']['name'] for t in tags_a_response.data} if tags_a_response.data else set()
-            tags_b = {t['tags']['name'] for t in tags_b_response.data} if tags_b_response.data else set()
+            tag_score = min(len(set_a & set_b) * 4, 20)
 
-            # Tag compatibility (4% per match, max 20%)
-            matching_tags = len(tags_a & tags_b)
-            tag_score = min(matching_tags * 4, 20)
+            # OCEAN из таблицы test_results (отдельная таблица)
+            tr_resp = self.db.table('test_results').select('*').in_(
+                'user_id', [user_id_a, user_id_b]
+            ).execute()
 
-            # Get test results
-            test_a_response = self.db.table('test_results').select('*').eq(
-                'user_id', user_id_a
-            ).order('created_at', desc=True).limit(1).execute()
+            tr_a = next((r for r in (tr_resp.data or []) if r['user_id'] == user_id_a), {})
+            tr_b = next((r for r in (tr_resp.data or []) if r['user_id'] == user_id_b), {})
 
-            test_b_response = self.db.table('test_results').select('*').eq(
-                'user_id', user_id_b
-            ).order('created_at', desc=True).limit(1).execute()
+            if not tr_a or not tr_b:
+                return float(tag_score)
 
-            if not test_a_response.data or not test_b_response.data:
-                return tag_score  # Return only tag score if no test results
+            ocean_dims = ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism']
+            ocean_score = 0.0
 
-            test_a = test_a_response.data[0]
-            test_b = test_b_response.data[0]
+            for dim in ocean_dims:
+                x = float(tr_a.get(dim) or 5)
+                y = float(tr_b.get(dim) or 5)
+                # (9 - |x-y|) / 9 * 16%
+                ocean_score += (9 - sqrt((x - y) ** 2)) / 9 * 16
 
-            # OCEAN compatibility using provided formula
-            ocean_dimensions = ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism']
-            ocean_score = 0
-
-            for dimension in ocean_dimensions:
-                x = test_a.get(dimension, 5)
-                y = test_b.get(dimension, 5)
-
-                # Formula: (9 - √((x-y)²)) / 9 * 0.16 * 100
-                dimension_score = (9 - sqrt((x - y) ** 2)) / 9 * 0.16 * 100
-                ocean_score += dimension_score
-
-            # Total: tags (20%) + OCEAN (80%)
-            total_compatibility = tag_score + ocean_score
-
-            return round(min(total_compatibility, 100), 2)
+            total = tag_score + ocean_score
+            return round(min(total, 100.0), 2)
 
         except Exception as e:
             logger.error(f"Error calculating compatibility: {e}")
