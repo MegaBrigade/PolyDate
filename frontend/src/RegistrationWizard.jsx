@@ -95,9 +95,11 @@ export default function RegistrationWizard({ onComplete, telegramId }) {
             const dateOfBirth = `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
 
             // 2. FIX: добавлен gender в payload
+            const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
             const payload = {
               telegram_id: telegramId,
               username: userData.name.toLowerCase().replace(/\s+/g, '_') + '_' + telegramId,
+              telegram_username: tgUser?.username || null,
               first_name: userData.name.trim(),
               gender: userData.gender,        // FIX: был пропущен
               date_of_birth: dateOfBirth,

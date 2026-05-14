@@ -21,7 +21,7 @@ class ProfileService:
 
             user_record = {
                 'id': user_data.telegram_id,
-                'username': user_data.username,
+                'username': user_data.telegram_username or user_data.username,
                 'first_name': user_data.first_name,
                 'last_name': user_data.last_name,
                 'gender': user_data.gender,  # NOT NULL в БД
