@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from './css/SettingsScreen.module.css';
 import TagsSelectionScreen from './TagsSelectionScreen';
-import { updateProfile, clearUserId } from './api';
+import { updateProfile, updateTags, clearUserId } from './api';
 
 /**
  * SettingsScreen
@@ -44,10 +44,11 @@ export default function SettingsScreen({ userData, userId, onBack, onLogout, onP
         initialTags={userData?.tags || []}
         onSave={async (newTags) => {
           try {
-            await updateProfile(userId, { tags: newTags });
+            await updateTags(userId, newTags);
             if (onProfileUpdate) onProfileUpdate();
           } catch (err) {
             console.error('Ошибка сохранения тегов:', err);
+            alert('Не удалось сохранить теги: ' + err.message);
           }
           setShowTags(false);
         }}

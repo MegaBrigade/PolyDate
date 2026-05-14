@@ -1,5 +1,5 @@
 from supabase import Client
-from math import sqrt, radians, cos, sin, asin
+from math import radians, cos, sin, asin, sqrt
 import logging
 from typing import List
 
@@ -39,7 +39,7 @@ class RecommendationService:
 
             # Получаем всех видимых пользователей кроме себя
             all_users = self.db.table('users').select(
-                'id, age, latitude, longitude, is_visible'
+                'id, age, gender, latitude, longitude, is_visible'
             ).neq('id', user_id).eq('is_visible', True).execute()
 
             if not all_users.data:
@@ -92,6 +92,10 @@ class RecommendationService:
                 if age_max and other.get('age', 999) > age_max:
                     continue
 
+                if gender_filter and gender_filter != 'all':
+                    if other.get('gender', '').lower() != gender_filter.lower():
+                        continue
+
                 compatibility = await self.calculate_compatibility(user_id, other['id'])
                 candidates.append({
                     'user_id': other['id'],
@@ -110,8 +114,15 @@ class RecommendationService:
         """
         0-100%.
         20% — теги (4% за каждый совпадающий, макс 5)
-        80% — OCEAN из users.test_results JSONB
+        80% — OCEAN из test_results (по 16% на каждое из 5 измерений)
+
+        Если у одного из пользователей нет результатов теста —
+        используем нейтральные значения (5) для недостающих данных,
+        что даёт 50% по OCEAN-части вместо полного игнорирования.
+        Если тест не прошёл никто — возвращаем только tag_score.
         """
+        NEUTRAL = 5.0  # нейтральное значение на шкале 1-10
+
         try:
             # Теги
             tags_a = self.db.table('user_tags').select('tags(name)').eq('user_id', user_id_a).execute()
@@ -122,25 +133,32 @@ class RecommendationService:
 
             tag_score = min(len(set_a & set_b) * 4, 20)
 
-            # OCEAN из таблицы test_results (отдельная таблица)
-            tr_resp = self.db.table('test_results').select('*').in_(
-                'user_id', [user_id_a, user_id_b]
-            ).execute()
+            # OCEAN из таблицы test_results
+            # Приводим id к int явно, чтобы избежать проблем с bigint/str из Supabase
+            id_a = int(user_id_a)
+            id_b = int(user_id_b)
 
-            tr_a = next((r for r in (tr_resp.data or []) if r['user_id'] == user_id_a), {})
-            tr_b = next((r for r in (tr_resp.data or []) if r['user_id'] == user_id_b), {})
+            tr_resp = self.db.table('test_results').select(
+                'user_id, openness, conscientiousness, extraversion, agreeableness, neuroticism'
+            ).in_('user_id', [id_a, id_b]).execute()
 
-            if not tr_a or not tr_b:
+            records = {int(r['user_id']): r for r in (tr_resp.data or [])}
+            tr_a = records.get(id_a)
+            tr_b = records.get(id_b)
+
+            # Если ни у кого нет теста — только теги
+            if not tr_a and not tr_b:
                 return float(tag_score)
 
             ocean_dims = ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism']
             ocean_score = 0.0
 
             for dim in ocean_dims:
-                x = float(tr_a.get(dim) or 5)
-                y = float(tr_b.get(dim) or 5)
-                # (9 - |x-y|) / 9 * 16%
-                ocean_score += (9 - sqrt((x - y) ** 2)) / 9 * 16
+                x = float((tr_a or {}).get(dim) or NEUTRAL)
+                y = float((tr_b or {}).get(dim) or NEUTRAL)
+                # Чем меньше разница — тем выше совместимость
+                # Максимальная разница на шкале 1-10 = 9
+                ocean_score += (9 - abs(x - y)) / 9 * 16
 
             total = tag_score + ocean_score
             return round(min(total, 100.0), 2)

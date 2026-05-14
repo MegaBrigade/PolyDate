@@ -37,11 +37,17 @@ export default function MainApp({ userId, onLogout }) {
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
   const [filters, setFilters] = useState({ minAge: 18, maxAge: 100, gender: 'all' });
   // ── Загрузка следующей анкеты из ленты ─────────────────────
-  const loadNextCandidate = useCallback(async () => {
+  const loadNextCandidate = useCallback(async (currentFilters) => {
     if (!userId) return;
+    const f = currentFilters || filters;
     setFeedLoading(true);
     try {
-      const res = await getNextCandidate(userId);
+      const res = await getNextCandidate(userId, {
+        radiusKm: 50,
+        ageMin: f.minAge !== 18 ? f.minAge : undefined,
+        ageMax: f.maxAge !== 100 ? f.maxAge : undefined,
+        gender: f.gender !== 'all' ? f.gender : undefined,
+      });
       if (res.candidate) {
         setFeedProfile(normalizeCandidate(res.candidate));
         setFeedEmpty(false);
@@ -56,7 +62,7 @@ export default function MainApp({ userId, onLogout }) {
     } finally {
       setFeedLoading(false);
     }
-  }, [userId]);
+  }, [userId, filters]);
 
   // ── Загрузка списка лайков ─────────────────────────────────
   const loadLikes = useCallback(async () => {
@@ -154,7 +160,7 @@ export default function MainApp({ userId, onLogout }) {
   });
   const updateFilters = (newFilters) => {
     setFilters(newFilters);
-    loadNextCandidate();
+    loadNextCandidate(newFilters);
   };
   // ── ProfileModal ───────────────────────────────────────────
   const openProfileModal = (user) => setSelectedProfile(user);
