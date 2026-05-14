@@ -26,7 +26,7 @@ class HealthHandler(BaseHTTPRequestHandler):
         self.wfile.write(b"ok")
 
     def log_message(self, format, *args):
-        pass  # заглушаем логи HTTP-сервера
+        pass
 
 
 def run_health_server():
@@ -48,8 +48,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def run_bot():
     app = Application.builder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
-    logger.info("Bot is polling...")
-    await app.run_polling()
+
+    async with app:
+        await app.start()
+        await app.updater.start_polling()
+        logger.info("Bot is polling...")
+        # Висим вечно пока процесс не убьют
+        await asyncio.Event().wait()
+        await app.updater.stop()
+        await app.stop()
 
 
 def main():
