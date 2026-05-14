@@ -45,20 +45,27 @@ class NotificationService:
         user_id: int,
         match_user_id: int,
         match_user_name: str,
-        match_user_username: str = None,  # оставлен для совместимости, не используется
+        match_user_username: str = None,
     ) -> bool:
         """
         Уведомление о матче.
 
         Args:
             user_id: Telegram ID получателя (= users.id в БД)
-            match_user_id: Telegram ID второго участника матча (не используется в тексте)
-            match_user_name: Имя второго участника матча
-            match_user_username: Не используется (Telegram username не хранится в БД)
+            match_user_id: Telegram ID второго участника (не используется напрямую)
+            match_user_name: Имя второго участника
+            match_user_username: Telegram @username второго участника (если есть)
         """
+        if match_user_username:
+            # Убираем @ если он уже есть, и строим ссылку
+            clean = match_user_username.lstrip('@')
+            name_part = f'<a href="https://t.me/{clean}">{match_user_name}</a>'
+        else:
+            name_part = f'<b>{match_user_name}</b>'
+
         text = (
             f"🎉 <b>Это мэтч!</b>\n\n"
-            f"Вы и <b>{match_user_name}</b> понравились друг другу!\n\n"
+            f"Вы и {name_part} понравились друг другу!\n\n"
             f"Напишите первым — не упустите момент 💬"
         )
         ok = await self._send(user_id, text)

@@ -11,6 +11,7 @@ class PhotoItem(BaseModel):
 class UserRegisterRequest(BaseModel):
     telegram_id: int
     username: str
+    telegram_username: Optional[str] = None  # настоящий @username из Telegram
     first_name: str
     last_name: Optional[str] = None
     gender: str  # обязательное поле NOT NULL в БД
