@@ -130,110 +130,87 @@ class TestService:
     # CALCULATE RESULTS
     # ============================================
 
+    # Статический маппинг вопросов → (измерение OCEAN, обратная шкала)
+    # Соответствует порядку вопросов в Test.jsx и test.html
+    QUESTION_MAP: Dict[int, tuple] = {
+        1:  ('A', False),   # Я склонен сочувствовать другим людям
+        2:  ('O', False),   # У меня полно разных идей
+        3:  ('E', False),   # Я интересуюсь делами друзей и коллег
+        4:  ('N', False),   # Я часто чувствую себя поглощенным разными проблемами
+        5:  ('E', False),   # Я легко справляюсь с взаимодействованием с людьми
+        6:  ('E', True),    # Я довольно скрытный человек (обратная)
+        7:  ('A', True),    # Я избегаю общения со сложными людьми (обратная)
+        8:  ('O', False),   # Мне нравится разбираться со сложностями
+        9:  ('C', True),    # Я часто попусту трачу время (обратная)
+        10: ('N', True),    # Меня нелегко заставить беспокоиться (обратная)
+        11: ('C', False),   # Я планирую и придерживаюсь своих планов
+        12: ('N', False),   # Меня довольно легко задеть
+        13: ('C', False),   # Как правило, я работаю по расписанию
+        14: ('A', False),   # Я умею успокаивать людей
+        15: ('C', False),   # Я люблю заранее планировать свой день
+    }
+
     async def calculate_results(self, user_id: int, answers: Dict[int, int]) -> Dict[str, int]:
         """
-        Calculate OCEAN test results from answers.
+        Рассчитывает OCEAN-результаты из ответов пользователя.
 
-        Process:
-        1. Get questions from cache (very fast)
-        2. Process answers with reverse scoring
-        3. Calculate averages per dimension
-        4. Convert from 1-5 scale to 1-10 scale
+        Маппинг вопросов → измерениям жёстко задан в QUESTION_MAP и
+        не зависит от таблицы test_questions в БД.
 
         Args:
-            user_id: User ID (for logging)
-            answers: {question_id: answer_score (1-5)}
+            user_id: ID пользователя (для логирования)
+            answers: {question_id: score (1-5)}
 
         Returns:
-            {
-                'openness': 1-10,
-                'conscientiousness': 1-10,
-                'extraversion': 1-10,
-                'agreeableness': 1-10,
-                'neuroticism': 1-10
-            }
+            {'openness': 1-10, 'conscientiousness': 1-10, ...}
         """
         try:
-            # Validate input
             if len(answers) != 15:
-                raise ValueError(f"Expected 15 answers, got {len(answers)}")
+                raise ValueError(f"Ожидалось 15 ответов, получено {len(answers)}")
 
-            logger.info(f"Calculating results for user {user_id} (15 answers)")
+            logger.info(f"Расчёт результатов теста для пользователя {user_id}")
 
-            # Get questions from cache (or fetch if needed)
-            questions = await self._get_questions_cache()
+            dimension_scores: Dict[str, list] = {'O': [], 'C': [], 'E': [], 'A': [], 'N': []}
 
-            # Initialize scores per dimension
-            dimension_scores = {
-                'O': [],  # Openness
-                'C': [],  # Conscientiousness
-                'E': [],  # Extraversion
-                'A': [],  # Agreeableness
-                'N': []  # Neuroticism
-            }
-
-            # Process each answer
             for question_id, answer in answers.items():
-                # Validate answer
-                if not (1 <= answer <= 5):
-                    raise ValueError(f"Invalid answer for Q{question_id}: {answer} (must be 1-5)")
+                qid = int(question_id)  # JSON-ключи могут прийти строкой
 
-                # Get question details
-                if question_id not in questions:
-                    logger.warning(f"Question {question_id} not found in cache, skipping")
+                if not (1 <= int(answer) <= 5):
+                    raise ValueError(f"Недопустимый ответ на вопрос {qid}: {answer} (должно быть 1-5)")
+
+                if qid not in self.QUESTION_MAP:
+                    logger.warning(f"Вопрос {qid} не найден в маппинге, пропускаем")
                     continue
 
-                question = questions[question_id]
-                dimension = question['dimension']
-                is_reverse = question['is_reverse']
-
-                # Apply reverse scoring if needed
-                if is_reverse:
-                    score = 6 - answer  # 1→5, 2→4, 3→3, 4→2, 5→1
-                else:
-                    score = answer
-
+                dimension, is_reverse = self.QUESTION_MAP[qid]
+                score = (6 - int(answer)) if is_reverse else int(answer)
                 dimension_scores[dimension].append(score)
 
-            logger.info(f"Raw scores: {dimension_scores}")
+            logger.info(f"Сырые баллы по измерениям: {dimension_scores}")
 
-            # Calculate final scores (1-5 scale → 1-10 scale)
-            results = {}
-            for dimension in ['O', 'C', 'E', 'A', 'N']:
-                if dimension_scores[dimension]:
-                    # Calculate average on 1-5 scale
-                    average_5_scale = sum(dimension_scores[dimension]) / len(dimension_scores[dimension])
-
-                    # Convert to 1-10 scale
-                    # Formula: (value - 1) * (10-1) / (5-1) + 1
-                    #        = (value - 1) * 2.25 + 1
-                    score_10_scale = (average_5_scale - 1) * 2.25 + 1
-
-                    # Round to nearest integer
-                    score_10_scale = round(score_10_scale)
-
-                    # Clamp to 1-10 range
-                    score_10_scale = max(1, min(10, score_10_scale))
-
-                    results[dimension] = score_10_scale
-                else:
-                    # Shouldn't happen, but default to middle score
-                    results[dimension] = 5
-
-            # Map to readable names
-            final_results = {
-                'openness': results['O'],
-                'conscientiousness': results['C'],
-                'extraversion': results['E'],
-                'agreeableness': results['A'],
-                'neuroticism': results['N']
+            dim_to_name = {
+                'O': 'openness',
+                'C': 'conscientiousness',
+                'E': 'extraversion',
+                'A': 'agreeableness',
+                'N': 'neuroticism',
             }
 
-            logger.info(f"✅ Calculated test results for user {user_id}: {final_results}")
+            final_results = {}
+            for dim, name in dim_to_name.items():
+                scores = dimension_scores[dim]
+                if scores:
+                    avg = sum(scores) / len(scores)          # шкала 1-5
+                    score_10 = (avg - 1) * 2.25 + 1         # перевод в 1-10
+                    final_results[name] = max(1, min(10, round(score_10)))
+                else:
+                    final_results[name] = 5                  # нейтральное значение
+
+            logger.info(f"✅ Результаты теста пользователя {user_id}: {final_results}")
             return final_results
 
         except Exception as e:
-            logger.error(f"❌ Error calculating results: {e}")
+            logger.error(f"❌ Ошибка расчёта результатов: {e}")
             raise
 
     # ============================================
