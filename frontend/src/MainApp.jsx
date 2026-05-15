@@ -232,7 +232,7 @@ export default function MainApp({ userId, onLogout }) {
 
   return (
     <div className="main-app">
-      {matchData ? (
+      {/* {matchData ? (
         <MatchScreen matchUser={matchData} onClose={() => setMatchData(null)} />
       ) : (
         <>
@@ -242,6 +242,18 @@ export default function MainApp({ userId, onLogout }) {
       )}
       {selectedProfile && (
         <ProfileModal user={selectedProfile} onClose={closeProfileModal} />
+      )} */}
+      {matchData ? (
+        <MatchScreen
+          matchUser={matchData}
+          onClose={() => setMatchData(null)}
+          currentUserPhoto={myProfile?.photos?.[0]?.url || '/assets/default-avatar.svg'}
+        />
+      ) : (
+        <>
+          <div className="app-main">{renderContent()}</div>
+          <BottomNavBar activeTab={activeTab} onTabChange={setActiveTab} />
+        </>
       )}
     </div>
   );
