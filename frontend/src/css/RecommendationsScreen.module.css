@@ -200,7 +200,13 @@
     aspect-ratio: 4 / 3;
   }
 }
+
 .filtersBtn {
+  width: auto; 
+  min-width: 80px;
+  flex-shrink: 0;
+  margin-right: 12px; 
+  white-space: nowrap;   
   background: linear-gradient(135deg, #ff85c1, #F84CAA); 
   border: none;
   border-radius: 40px;
