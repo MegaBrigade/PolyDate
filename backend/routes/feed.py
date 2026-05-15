@@ -67,11 +67,19 @@ async def get_next_candidate(
             'user_id', top_candidate['user_id']
         ).eq('moderation_status', 'approved').order('order_index').execute()
 
+        # Get tags
+        tags_response = db.table('user_tags').select('tags(name)').eq(
+            'user_id', top_candidate['user_id']
+        ).execute()
+
         if candidate_response.data:
             candidate = candidate_response.data[0]
             candidate['photos'] = [p['url'] for p in photos_response.data] if photos_response.data else []
             candidate['compatibility_percentage'] = current_compatibility  # ✅ Use fresh calculation
             candidate['distance_km'] = top_candidate['distance']
+            candidate['tags'] = [
+                t['tags']['name'] for t in tags_response.data if t.get('tags')
+            ] if tags_response.data else []
 
             return {
                 "success": True,
