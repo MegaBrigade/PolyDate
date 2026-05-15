@@ -22,7 +22,7 @@ export default function MainApp({ userId, onLogout }) {
   const [selectedProfile, setSelectedProfile] = useState(null);
 
   // ── Лента рекомендаций ──────────────────────────────────────
-  const [feedProfile, setFeedProfile] = useState(null);   // текущая анкета в ленте
+  const [feedProfile, setFeedProfile] = useState(null);
   const [feedLoading, setFeedLoading] = useState(false);
   const [feedEmpty, setFeedEmpty] = useState(false);
 
@@ -32,14 +32,17 @@ export default function MainApp({ userId, onLogout }) {
 
   // ── Профиль текущего юзера ─────────────────────────────────
   const [myProfile, setMyProfile] = useState(null);
-  // ── Фильтры ─────────────────────────────────
-  const [profiles, setProfiles] = useState([]);       // весь список кандидатов
-  const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
+
+  // ── Фильтры ─────────────────────────────────────────────────
   const [filters, setFilters] = useState({ minAge: 18, maxAge: 100, gender: 'all' });
+
   // ── Загрузка следующей анкеты из ленты ─────────────────────
+  // Принимает фильтры явным аргументом, чтобы не зависеть от замыкания.
+  // ВАЖНО: зависимость только [userId], НЕ [filters] — иначе useEffect
+  // запускается дважды при каждом изменении фильтра.
   const loadNextCandidate = useCallback(async (currentFilters) => {
     if (!userId) return;
-    const f = currentFilters || filters;
+    const f = currentFilters || {};
     setFeedLoading(true);
     try {
       const res = await getNextCandidate(userId, {
@@ -62,7 +65,7 @@ export default function MainApp({ userId, onLogout }) {
     } finally {
       setFeedLoading(false);
     }
-  }, [userId, filters]);
+  }, [userId]);
 
   // ── Загрузка списка лайков ─────────────────────────────────
   const loadLikes = useCallback(async () => {
@@ -90,11 +93,14 @@ export default function MainApp({ userId, onLogout }) {
     }
   }, [userId]);
 
-  // ── Начальная загрузка ─────────────────────────────────────
+  // ── Начальная загрузка — только один раз при появлении userId ──
+  // Фильтры НЕ в зависимостях: при их изменении перезагрузку
+  // делает updateFilters напрямую, без участия этого эффекта.
   useEffect(() => {
-    loadNextCandidate();
+    if (!userId) return;
+    loadNextCandidate({ minAge: 18, maxAge: 100, gender: 'all' });
     loadMyProfile();
-  }, [loadNextCandidate, loadMyProfile]);
+  }, [userId, loadNextCandidate, loadMyProfile]);
 
   // Загружаем лайки только при переходе на вкладку
   useEffect(() => {
@@ -114,7 +120,7 @@ export default function MainApp({ userId, onLogout }) {
     } catch (err) {
       console.error('Ошибка лайка:', err);
     }
-    loadNextCandidate();
+    loadNextCandidate(filters);
   };
 
   const handleDislike = async () => {
@@ -124,10 +130,10 @@ export default function MainApp({ userId, onLogout }) {
     } catch (err) {
       console.error('Ошибка дизлайка:', err);
     }
-    loadNextCandidate();
+    loadNextCandidate(filters);
   };
 
-  // ── Лайк из экрана "Лайки" ─────────────────────────────────
+  // ── Лайк из экрана «Лайки» ─────────────────────────────────
   const handleLikeInLikes = async (user) => {
     try {
       const res = await likeUser(userId, user.id);
@@ -152,53 +158,42 @@ export default function MainApp({ userId, onLogout }) {
       console.error('Ошибка дизлайка:', err);
     }
   };
-  //  ── Вычисление отфильтрованных профилей ───────────────────────────────────────────
-  const filteredProfiles = profiles.filter(profile => {
-    if (profile.age < filters.minAge || profile.age > filters.maxAge) return false;
-    if (filters.gender !== 'all' && profile.gender !== filters.gender) return false;
-    return true;
-  });
+
+  // ── Обновление фильтров — единственная точка изменения + перезагрузка ──
+  // newFilters передаётся явно в loadNextCandidate, потому что setFilters
+  // асинхронный и state ещё не обновлён в момент вызова.
   const updateFilters = (newFilters) => {
     setFilters(newFilters);
     loadNextCandidate(newFilters);
   };
+
   // ── ProfileModal ───────────────────────────────────────────
   const openProfileModal = (user) => setSelectedProfile(user);
   const closeProfileModal = () => setSelectedProfile(null);
 
   // ── Контент по вкладкам ────────────────────────────────────
-
-  /**
-   * RecommendationsScreen ожидает:
-   *   profiles[], currentIndex, onNextProfile, onMatch, onOpenProfile
-   *
-   * Мы адаптируем: передаём массив с одним профилем и фиктивный currentIndex=0,
-   * а onNextProfile вызывает loadNextCandidate.
-   */
   const renderContent = () => {
     switch (activeTab) {
       case 'recommendations': {
-        if (feedLoading && !feedProfile) {
+        // Показываем лоадер только при самой первой загрузке
+        if (feedLoading && !feedProfile && !feedEmpty) {
           return (
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%', color:'#fff' }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              height: '100%', color: '#fff'
+            }}>
               Загрузка…
             </div>
           );
         }
-        if (feedEmpty || !feedProfile) {
-          return (
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'center',
-              height:'100%', color:'#fff', flexDirection:'column', gap:'12px', padding:'24px', textAlign:'center' }}>
-              <p style={{ fontSize:'20px' }}>🎉</p>
-              <p>Анкеты закончились. Загляни позже!</p>
-            </div>
-          );
-        }
+        // RecommendationsScreen рендерится ВСЕГДА (даже когда анкеты закончились),
+        // чтобы кнопка «Фильтры» оставалась доступной.
+        // Пустое состояние обрабатывается внутри компонента (ветка !profiles.length).
         return (
           <RecommendationsScreen
-            profiles={[feedProfile]}
+            profiles={feedProfile ? [feedProfile] : []}
             currentIndex={0}
-            onNextProfile={loadNextCandidate}
+            onNextProfile={() => loadNextCandidate(filters)}
             onMatch={(user) => setMatchData(user)}
             onOpenProfile={openProfileModal}
             filters={filters}
@@ -210,7 +205,14 @@ export default function MainApp({ userId, onLogout }) {
       }
 
       case 'profile':
-        return <ProfileScreen userId={userId} userData={myProfile} onProfileUpdate={loadMyProfile} onLogout={onLogout} />;
+        return (
+          <ProfileScreen
+            userId={userId}
+            userData={myProfile}
+            onProfileUpdate={loadMyProfile}
+            onLogout={onLogout}
+          />
+        );
 
       case 'matches':
         return (
