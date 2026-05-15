@@ -219,7 +219,6 @@ export default function RecommendationsScreen({ profiles, currentIndex, onNextPr
         <div className={styles.noProfilesMessage}>
           <p>Нет подходящих анкет.</p>
           <p>Попробуйте изменить параметры фильтрации.</p>
-          <button className={styles.filtersBtn} onClick={() => setShowFilters(true)}>Открыть фильтры</button>
         </div>
         {showFilters && (
           <FiltersModal
