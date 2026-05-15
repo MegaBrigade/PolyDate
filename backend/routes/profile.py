@@ -3,6 +3,7 @@ from supabase import Client
 from backend.database import get_db
 from backend.services.profile_service import ProfileService
 from backend.services.moderation_service import ModerationService
+from backend.services.recommendation_service import RecommendationService
 from backend.schemas.user import UserUpdateRequest, UserProfileResponse
 from typing import Optional
 import logging
@@ -83,6 +84,9 @@ async def update_tags(
     try:
         service = ProfileService(db)
         await service.add_tags(user_id, tags)
+
+	rec_service = RecommendationService(db)
+        rec_service.invalidate_cache_for_user(user_id)
 
         return {"success": True, "tags": tags}
 
