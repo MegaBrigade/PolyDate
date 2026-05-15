@@ -201,13 +201,7 @@ export default function RecommendationsScreen({ profiles, currentIndex, onNextPr
       if (user && user.photos?.length) setCurrentPhoto(0);
     }, [currentIndex, user]);
 
-  useLayoutEffect(() => {
-    const parent = document.querySelector('.app-main');
-    if (parent) parent.style.overflowY = 'hidden';
-    return () => {
-      if (parent) parent.style.overflowY = 'auto';
-    };
-  }, []);
+  // overflow управляется через CSS (.container overflow: hidden)
   if (!profiles.length || !user) {
     return (
       <div className={styles.container}>
@@ -284,13 +278,6 @@ export default function RecommendationsScreen({ profiles, currentIndex, onNextPr
         </div> */}
         <div className={styles.overlay} onClick={() => onOpenProfile(user)}>
           <div className={styles.nameAge}>{user.name}, {user.age}</div>
-          {user.tags && user.tags.length > 0 && (
-            <div className={styles.tags}>
-              {user.tags.slice(0, 4).map(tag => (
-                <span key={tag} className={styles.tag}>#{tag}</span>
-              ))}
-            </div>
-          )}
           <p className={styles.bio}>{user.bio}</p>
           <div className={styles.actionGroup}>
             <button className={`${styles.btn} ${styles.dislike}`} onClick={(e) => { e.stopPropagation(); handleAction('dislike'); }}>

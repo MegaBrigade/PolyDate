@@ -28,6 +28,7 @@
   padding-bottom: 80px;
   height: 100vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .main-app .bottom-nav {
   position: fixed;

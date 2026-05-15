@@ -18,6 +18,19 @@ import {
 
 export default function MainApp({ userId, onLogout }) {
   const [activeTab, setActiveTab] = useState('recommendations');
+
+  // Управляем скроллом app-main в зависимости от вкладки
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    const appMain = document.querySelector('.app-main');
+    if (!appMain) return;
+    if (tab === 'recommendations') {
+      appMain.style.overflowY = 'hidden';
+    } else {
+      appMain.style.overflowY = 'auto';
+      appMain.scrollTop = 0;
+    }
+  };
   const [matchData, setMatchData] = useState(null);
   const [selectedProfile, setSelectedProfile] = useState(null);
 
@@ -100,6 +113,9 @@ export default function MainApp({ userId, onLogout }) {
     if (!userId) return;
     loadNextCandidate({ minAge: 18, maxAge: 100, gender: 'all' });
     loadMyProfile();
+    // Начальное состояние — вкладка рекомендаций, скролл заблокирован
+    const appMain = document.querySelector('.app-main');
+    if (appMain) appMain.style.overflowY = 'hidden';
   }, [userId, loadNextCandidate, loadMyProfile]);
 
   // Загружаем лайки только при переходе на вкладку
@@ -237,7 +253,7 @@ export default function MainApp({ userId, onLogout }) {
       ) : (
         <>
           <div className="app-main">{renderContent()}</div>
-          <BottomNavBar activeTab={activeTab} onTabChange={setActiveTab} />
+          <BottomNavBar activeTab={activeTab} onTabChange={handleTabChange} />
         </>
       )}
       {selectedProfile && (
@@ -252,7 +268,7 @@ export default function MainApp({ userId, onLogout }) {
       ) : (
         <>
           <div className="app-main">{renderContent()}</div>
-          <BottomNavBar activeTab={activeTab} onTabChange={setActiveTab} />
+          <BottomNavBar activeTab={activeTab} onTabChange={handleTabChange} />
         </>
       )}
     </div>
