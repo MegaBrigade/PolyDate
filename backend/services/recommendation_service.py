@@ -11,6 +11,44 @@ class RecommendationService:
 
     def __init__(self, db: Client):
         self.db = db
+        # In‑memory кэш: ключ -> {"candidates": [...], "timestamp": float}
+        self._cache: Dict[str, Dict[str, Any]] = {}
+        self._cache_ttl = 300  # 5 минут
+
+    #Cache
+    def _make_cache_key(self, user_id: int, radius_km: float,
+                        age_min: Optional[int], age_max: Optional[int],
+                        gender_filter: Optional[str]) -> str:
+        """Формирует уникальный ключ кэша по всем параметрам фильтрации"""
+        return f"{user_id}:{radius_km}:{age_min}:{age_max}:{gender_filter}"
+
+    def _get_cached_candidates(self, key: str) -> Optional[List[dict]]:
+        """Возвращает кэшированный список кандидатов, если он актуален"""
+        if key in self._cache:
+            entry = self._cache[key]
+            if time.time() - entry['timestamp'] < self._cache_ttl:
+                logger.debug(f"Cache hit for key {key}")
+                return entry['candidates']
+            else:
+                # Устаревшая запись удаляется
+                del self._cache[key]
+                logger.debug(f"Cache expired for key {key}")
+        return None
+
+    def _set_cached_candidates(self, key: str, candidates: List[dict]) -> None:
+        """Сохраняет список кандидатов в кэш с текущей меткой времени"""
+        self._cache[key] = {
+            'candidates': candidates,
+            'timestamp': time.time()
+        }
+        logger.debug(f"Cached candidates for key {key}, count={len(candidates)}")
+
+    def invalidate_cache_for_user(self, user_id: int) -> None:
+        """Удаляет все кэшированные ленты для указанного пользователя"""
+        keys_to_delete = [k for k in self._cache if k.startswith(f"{user_id}:")]
+        for k in keys_to_delete:
+            del self._cache[k]
+        logger.info(f"Invalidated cache for user {user_id}, removed {len(keys_to_delete)} entries")
 
     def haversine_distance(self, lat1: float, lon1: float, lat2: float, lon2: float) -> float:
         R = 6371
@@ -23,10 +61,19 @@ class RecommendationService:
             self,
             user_id: int,
             radius_km: float = 50.0,
-            age_min: int = None,
-            age_max: int = None,
-            gender_filter: str = None
+            age_min: Optional[int] = None,
+            age_max: Optional[int] = None,
+            gender_filter: Optional[str] = None
     ) -> List[dict]:
+        """Возвращает список кандидатов с использованием кэша"""
+        # 1. Проверить кэш
+        cache_key = self._make_cache_key(user_id, radius_km, age_min, age_max, gender_filter)
+        cached = self._get_cached_candidates(cache_key)
+        if cached is not None:
+            return cached
+
+	# 2. Если кэша нет – выполнить полный расчёт (существующая логика)
+        try:
         try:
             user_response = self.db.table('users').select(
                 'latitude, longitude'
@@ -45,11 +92,6 @@ class RecommendationService:
             if not all_users.data:
                 return []
 
-            # Кого уже лайкнули (есть в liked_by у других И записи в likes)
-            # В нашей схеме "уже видели" = user_id есть в liked_by КОГО-ТО
-            # Но проще: получаем из feed.candidates уже показанных
-            # Fallback: пока просто исключаем тех, кто уже в matches
-
             # Получаем матчи — их не показываем
             matches = self.db.table('matches').select('user1_id, user2_id').or_(
                 f'user1_id.eq.{user_id},user2_id.eq.{user_id}'
@@ -60,11 +102,6 @@ class RecommendationService:
                 matched_ids.add(m['user2_id'])
             matched_ids.discard(user_id)
 
-            # Получаем тех, кто уже в нашем liked_by (мы их лайкнули)
-            # В likes: строка uid=user_id, liked_by — те кто лайкнул нас
-            # Нам нужно обратное: кого МЫ лайкнули
-            # Это хранится как: наш id есть в liked_by[candidate_id]
-            # Для фильтрации "уже свайпнутых" используем feed таблицу
             feed_row = self.db.table('feed').select('candidates').eq('user_id', user_id).execute()
             seen_ids = set()
             if feed_row.data and feed_row.data[0].get('candidates'):
@@ -76,7 +113,6 @@ class RecommendationService:
             for other in all_users.data:
                 if other['id'] in exclude_ids:
                     continue
-
                 if other['latitude'] is None or other['longitude'] is None:
                     continue
 
@@ -104,7 +140,9 @@ class RecommendationService:
                 })
 
             candidates.sort(key=lambda x: x['compatibility'], reverse=True)
-            return candidates
+	    # 3. Сохранить в кэш перед возвратом
+            self._set_cached_candidates(cache_key, candidates)            
+	    return candidates
 
         except Exception as e:
             logger.error(f"Error getting candidates: {e}")
@@ -134,7 +172,6 @@ class RecommendationService:
             tag_score = min(len(set_a & set_b) * 4, 20)
 
             # OCEAN из таблицы test_results
-            # Приводим id к int явно, чтобы избежать проблем с bigint/str из Supabase
             id_a = int(user_id_a)
             id_b = int(user_id_b)
 
