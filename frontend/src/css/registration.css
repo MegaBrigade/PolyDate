@@ -1,5 +1,4 @@
 
-
 @font-face {
   font-family: 'Gilroy-ExtraBold';
   src: url('../fonts/Gilroy-ExtraBold.woff2') format('woff2');
@@ -534,4 +533,14 @@ img {
     word-break: normal;      
     margin-top: 20px;
 
+}
+
+@media (max-width: 480px) {
+  .tags-grid {
+    gap: 9px;                  
+  }
+  .tag-item {
+    font-size: 12px;         
+    padding: 6px 8px;          
+  }
 }
