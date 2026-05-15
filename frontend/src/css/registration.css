@@ -470,25 +470,9 @@ img {
 }
 
 
-.tags-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin: 20px 0;
-}
 
 
-.tag-item {
-    border: none;
-    border-radius: 30px;
-    padding: 10px 12px;
-    text-align: center;
-    font-size: 18px;
-    color: #383436;
-    background-color:#FFF2F9;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
+
 
 
 .tag-item:hover {
@@ -535,25 +519,36 @@ img {
 
 }
 
-@media (max-width: 480px) {
-  .tags-grid {
-    gap: 9px;                  
-  }
-  .tag-item {
-    font-size: 12px;         
-    padding: 6px 8px;          
-  }
-}
-
 .tags-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
     margin: 20px 0;
     width: 100%;
     box-sizing: border-box;
 }
 
+.tag-item {
+    border: none;
+    border-radius: 30px;
+    padding: 8px 10px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: normal;
+    color: #383436;
+    background-color: #FFF2F9;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.3;
+}
+
+.tag-item.active {
+    background-color: #ff69b4;
+    color: white;
+}
 
 @media (max-width: 480px) {
     .tags-grid {
@@ -563,19 +558,28 @@ img {
     .tag-item {
         font-size: 11px;
         padding: 6px 8px;
-        white-space: normal;      
-        word-break: break-word;    
-        text-align: center;
     }
 }
 
-.registration-screen-tags .panel {
-    padding: clamp(30px, 5vw, 70px);
-    overflow-x: hidden;
+
+@media (max-width: 380px) {
+    .tag-item {
+        font-size: 10px;
+        padding: 5px 6px;
+    }
 }
 
+
+.registration-screen-tags .panel {
+    padding: clamp(30px, 5vw, 50px);
+    overflow-x: hidden;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+
 @media (max-width: 480px) {
-    .panel {
+    .registration-screen-tags .panel {
         padding-left: 16px !important;
         padding-right: 16px !important;
     }
