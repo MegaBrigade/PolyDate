@@ -284,6 +284,13 @@ export default function RecommendationsScreen({ profiles, currentIndex, onNextPr
         </div> */}
         <div className={styles.overlay} onClick={() => onOpenProfile(user)}>
           <div className={styles.nameAge}>{user.name}, {user.age}</div>
+          {user.tags && user.tags.length > 0 && (
+            <div className={styles.tags}>
+              {user.tags.slice(0, 4).map(tag => (
+                <span key={tag} className={styles.tag}>#{tag}</span>
+              ))}
+            </div>
+          )}
           <p className={styles.bio}>{user.bio}</p>
           <div className={styles.actionGroup}>
             <button className={`${styles.btn} ${styles.dislike}`} onClick={(e) => { e.stopPropagation(); handleAction('dislike'); }}>

@@ -238,3 +238,22 @@
     border-radius: 30px;
   }
 }
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.tag {
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  font-size: 12px;
+  font-family: "Gilroy-Light", sans-serif;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
