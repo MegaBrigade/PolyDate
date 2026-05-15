@@ -51,33 +51,27 @@ class ProfileService:
     async def get_profile(self, user_id: int) -> dict:
         """Get full user profile with photos and tags"""
         try:
-            user_response = self.db.table('users').select('*').eq('id', user_id).execute()
-            if not user_response.data:
+            # Один запрос: пользователь + его фото + теги (через связующую таблицу)
+            result = self.db.table('users') \
+                .select('*, photos(id, url, order_index, moderation_status), user_tags(tags(name))') \
+                .eq('id', user_id) \
+                .execute()
+
+            if not result.data:
                 return None
 
-            user = user_response.data[0]
+            user = result.data[0]
 
-            # Photos — сначала approved, fallback — все; возвращаем {id, url}
-            photos_response = self.db.table('photos').select('id, url').eq(
-                'user_id', user_id
-            ).eq('moderation_status', 'approved').order('order_index').execute()
+            # Обработка фото: сначала approved, если нет – все
+            raw_photos = user.pop('photos', [])
+            approved_photos = [p for p in raw_photos if p.get('moderation_status') == 'approved']
+            final_photos = approved_photos if approved_photos else raw_photos
+            user['photos'] = [{'id': p['id'], 'url': p['url']} for p in final_photos]
 
-            if not photos_response.data:
-                photos_response = self.db.table('photos').select('id, url').eq(
-                    'user_id', user_id
-                ).order('order_index').execute()
+            # Обработка тегов
+            user_tags_data = user.pop('user_tags', [])
+            user['tags'] = [item['tags']['name'] for item in user_tags_data if item.get('tags')]
 
-            # Tags через join
-            tags_response = self.db.table('user_tags').select(
-                'tags(name)'
-            ).eq('user_id', user_id).execute()
-
-            user['photos'] = [{'id': p['id'], 'url': p['url']} for p in photos_response.data] if photos_response.data else []
-            user['tags'] = [
-                t['tags']['name'] for t in tags_response.data if t.get('tags')
-            ] if tags_response.data else []
-
-            # test_results уже в user dict (JSONB-колонка)
             return user
 
         except Exception as e:
