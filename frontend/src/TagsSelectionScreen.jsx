@@ -14,7 +14,7 @@ const allTags = [
 ];
 
 
-export default function TagsSelectionScreen({ initialTags, onSave, onBack }) {
+export default function TagsSelectionScreen({ initialTags, onSave, onBack, hideBackButton = false }) {
   const [selectedTags, setSelectedTags] = useState(initialTags || []);
 
   const toggleTag = (tag) => {
@@ -54,7 +54,9 @@ export default function TagsSelectionScreen({ initialTags, onSave, onBack }) {
           ))}
         </div>
         <button className={styles.saveBtn} onClick={handleSave}>Сохранить</button>
-        <button className={styles.backBtn} onClick={onBack}>Назад</button>
+        {!hideBackButton && (
+          <button className={styles.backBtn} onClick={onBack}>Назад</button>
+        )}
       </div>
     </div>
   );

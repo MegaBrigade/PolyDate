@@ -2,8 +2,13 @@ import React, { useState } from 'react';
 import '../css/registration.css';
 import Test from './Test';
 import { register, saveUserId, updateTags, uploadPhoto, submitTest } from './api';
-
+import TagsSelectionScreen from './TagsSelectionScreen';
 export default function RegistrationWizard({ onComplete, telegramId }) {
+  const urlParams = new URLSearchParams(window.location.search);
+  // const testStep = urlParams.get('step');
+  // const initialStep = testStep ? parseInt(testStep) : 0;
+  // const [step, setStep] = useState(initialStep);
+
   const [step, setStep] = useState(0);
   const [userData, setUserData] = useState({
     name: '',
@@ -56,9 +61,9 @@ export default function RegistrationWizard({ onComplete, telegramId }) {
     if (step === 6) {
       if (!userData.description.trim()) { alert('Напишите о себе'); return; }
     }
-    if (step === 7) {
-      if (userData.tags.length === 0) { alert('Выберите хотя бы один тег'); return; }
-    }
+    // if (step === 7) {
+    //   if (userData.tags.length === 0) { alert('Выберите хотя бы один тег'); return; }
+    // }
     setStep(step + 1);
   };
 
@@ -164,7 +169,24 @@ export default function RegistrationWizard({ onComplete, telegramId }) {
       </div>
     );
   }
-
+  if (step === 7) {
+    return (
+      <div className="main-container">
+        <div className="splash-container">
+          <img className="polydate" src="/assets/polydate.svg" alt="Логотип приложения" />
+        </div>
+        <TagsSelectionScreen
+          initialTags={userData.tags}
+          onSave={(newTags) => {
+            setUserData({ ...userData, tags: newTags });
+            setStep(8);   // переход к тесту
+          }}
+          onBack={() => setStep(6)}
+          hideBackButton={true}
+        />
+      </div>
+    );
+  }
   return (
     <div className="main-container">
       <div id="splash" className="splash-container">
@@ -292,7 +314,8 @@ export default function RegistrationWizard({ onComplete, telegramId }) {
       </div>
 
       {/* Шаг 7 — Теги */}
-      <div className={`registration-screen-tags screen ${step === 7 ? 'active' : ''}`}>
+      
+      {/* <div className={`registration-screen-tags screen ${step === 7 ? 'active' : ''}`}>
         <div className="panel">
           <h2 className="text-title">Выберите теги</h2>
           <p className="main-text">Они помогут найти подходящего вам человека</p>
@@ -305,7 +328,7 @@ export default function RegistrationWizard({ onComplete, telegramId }) {
           </div>
           <button className="next-btn" onClick={nextStep}>Далее</button>
         </div>
-      </div>
+      </div> */}
 
       {/* Шаг 8 — Тест */}
       <div className={`registration-screen-test screen ${step === 8 ? 'active' : ''}`}>
