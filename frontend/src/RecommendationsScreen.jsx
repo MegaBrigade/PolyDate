@@ -154,7 +154,8 @@ export default function RecommendationsScreen({ profiles, currentIndex, onNextPr
   const [showFilters, setShowFilters] = useState(false);
   const user = profiles[currentIndex];
 
-  if (!user) return <div className={styles.container}>Нет анкет</div>;
+  // Пустое состояние обрабатывается ниже — в блоке !profiles.length || !user,
+  // чтобы кнопка «Фильтры» оставалась доступной.
 
   const handleNextPhoto = () => {
     if (isTransitioning || user.photos.length === 1) return;
