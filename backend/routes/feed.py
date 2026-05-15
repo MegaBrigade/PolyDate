@@ -11,10 +11,6 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/feed", tags=["feed"])
 
 
-# ============================================
-# EXISTING ENDPOINTS (Keep as is)
-# ============================================
-
 @router.get("/next-candidate")
 async def get_next_candidate(
         user_id: int = Query(...),
@@ -26,13 +22,11 @@ async def get_next_candidate(
 ):
     """
     Get next candidate from feed.
-
     Recalculates compatibility based on CURRENT tags.
     """
     try:
         service = RecommendationService(db)
 
-        # Get candidates sorted by compatibility
         candidates = await service.get_candidates(
             user_id,
             radius_km=radius_km,
@@ -48,26 +42,22 @@ async def get_next_candidate(
                 "message": "No more candidates available"
             }
 
-        # Get top candidate
         top_candidate = candidates[0]
 
-        # ✅ RECALCULATE compatibility with current tags
+        # Пересчитываем совместимость по актуальным тегам
         current_compatibility = await service.calculate_compatibility(
             user_id,
             top_candidate['user_id']
         )
 
-        # Fetch full profile
         candidate_response = db.table('users').select(
             'id, first_name, last_name, age, gender, city, bio, latitude, longitude'
         ).eq('id', top_candidate['user_id']).execute()
 
-        # Get photos
         photos_response = db.table('photos').select('url').eq(
             'user_id', top_candidate['user_id']
         ).eq('moderation_status', 'approved').order('order_index').execute()
 
-        # Get tags
         tags_response = db.table('user_tags').select('tags(name)').eq(
             'user_id', top_candidate['user_id']
         ).execute()
@@ -75,7 +65,7 @@ async def get_next_candidate(
         if candidate_response.data:
             candidate = candidate_response.data[0]
             candidate['photos'] = [p['url'] for p in photos_response.data] if photos_response.data else []
-            candidate['compatibility_percentage'] = current_compatibility  # ✅ Use fresh calculation
+            candidate['compatibility_percentage'] = current_compatibility
             candidate['distance_km'] = top_candidate['distance']
             candidate['tags'] = [
                 t['tags']['name'] for t in tags_response.data if t.get('tags')
@@ -93,15 +83,8 @@ async def get_next_candidate(
 
     except Exception as e:
         logger.error(f"Error fetching feed: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to fetch feed"
-        )
+        raise HTTPException(status_code=500, detail="Failed to fetch feed")
 
-
-# ============================================
-# NEW ENDPOINTS (Add these)
-# ============================================
 
 @router.get("/who-liked-me")
 async def who_liked_me(
@@ -109,17 +92,26 @@ async def who_liked_me(
         db: Client = Depends(get_db)
 ):
     """
-    Get list of users who liked you.
-
-    ⚡ FAST: Uses JSONB liked_by column directly!
-
-    Returns:
-    - List of user profiles who liked you
-    - Each includes: id, first_name, last_name, age, gender, city, photos
+    Get list of users who liked you, with compatibility percentages.
     """
     try:
         swipe_service = SwipeService(db)
         users = await swipe_service.get_likes_received(user_id)
+
+        if not users:
+            return {"success": True, "count": 0, "users": []}
+
+        # ФИХ: считаем совместимость для каждого, кто лайкнул
+        rec_service = RecommendationService(db)
+        for u in users:
+            liker_id = u.get('user_id') or u.get('id')
+            if liker_id:
+                try:
+                    compat = await rec_service.calculate_compatibility(user_id, liker_id)
+                    u['compatibility_percentage'] = compat
+                except Exception as e:
+                    logger.warning(f"Could not calculate compatibility for liker {liker_id}: {e}")
+                    u['compatibility_percentage'] = 0
 
         return {
             "success": True,
@@ -129,10 +121,7 @@ async def who_liked_me(
 
     except Exception as e:
         logger.error(f"Error fetching who liked me: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to fetch likes"
-        )
+        raise HTTPException(status_code=500, detail="Failed to fetch likes")
 
 
 @router.get("/check-liked")
@@ -143,11 +132,6 @@ async def check_if_liked(
 ):
     """
     Check if a specific user has liked you.
-
-    ⚡ VERY FAST: Simple JSONB array lookup!
-
-    Returns:
-    - has_liked: boolean
     """
     try:
         swipe_service = SwipeService(db)
@@ -160,7 +144,4 @@ async def check_if_liked(
 
     except Exception as e:
         logger.error(f"Error checking if liked: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to check like status"
-        )
+        raise HTTPException(status_code=500, detail="Failed to check like status")
