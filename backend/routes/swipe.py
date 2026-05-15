@@ -29,6 +29,10 @@ async def like_user(
         compatibility = await rec_service.calculate_compatibility(user_id, swipe.candidate_id)
         result = await swipe_service.like_user(user_id, swipe.candidate_id, compatibility)
 
+	# Инвалидируем кэш ленты для этого пользователя
+        rec_service = RecommendationService(db)
+        rec_service.invalidate_cache_for_user(user_id)
+
         # Уведомления при матче
         if result['is_match']:
             try:
@@ -74,6 +78,9 @@ async def dislike_user(
 
         swipe_service = SwipeService(db)
         result = await swipe_service.dislike_user(user_id, swipe.candidate_id)
+
+	rec_service = RecommendationService(db)
+        rec_service.invalidate_cache_for_user(user_id)
 
         return {"success": result['success'], "message": f"Passed on user {swipe.candidate_id}"}
 
