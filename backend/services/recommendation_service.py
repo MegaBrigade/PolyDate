@@ -3,6 +3,12 @@ from math import radians, cos, sin, asin, sqrt
 import logging
 from typing import List
 
+from backend.cache import (
+    cache,
+    TTL_CANDIDATES, TTL_COMPAT, TTL_TAGS, TTL_OCEAN, TTL_FEED_SEEN,
+    key_candidates, key_compat, key_tags, key_ocean, key_feed_seen,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -19,6 +25,74 @@ class RecommendationService:
         a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
         return R * 2 * asin(sqrt(a))
 
+    # ─── ТЕГИ ───────────────────────────────────────────────────────────
+    async def _get_user_tags(self, user_id: int) -> set:
+        cached = await cache.get(key_tags(user_id))
+        if cached is not None:
+            return cached
+        resp = self.db.table('user_tags').select('tags(name)').eq('user_id', user_id).execute()
+        tags = {t['tags']['name'] for t in resp.data if t.get('tags')} if resp.data else set()
+        await cache.set(key_tags(user_id), tags, ttl=TTL_TAGS)
+        return tags
+
+    # ─── OCEAN ──────────────────────────────────────────────────────────
+    async def _get_ocean(self, user_id: int):
+        cached = await cache.get(key_ocean(user_id))
+        if cached is not None:
+            return None if cached is False else cached
+        resp = self.db.table('test_results').select(
+            'openness, conscientiousness, extraversion, agreeableness, neuroticism'
+        ).eq('user_id', user_id).execute()
+        record = resp.data[0] if resp.data else None
+        await cache.set(key_ocean(user_id), record if record is not None else False, ttl=TTL_OCEAN)
+        return record
+
+    # ─── ПРОСМОТРЕННЫЕ ──────────────────────────────────────────────────
+    async def _get_seen_ids(self, user_id: int) -> set:
+        cached = await cache.get(key_feed_seen(user_id))
+        if cached is not None:
+            return cached
+        feed_row = self.db.table('feed').select('candidates').eq('user_id', user_id).execute()
+        seen = set()
+        if feed_row.data and feed_row.data[0].get('candidates'):
+            seen = set(feed_row.data[0]['candidates'])
+        await cache.set(key_feed_seen(user_id), seen, ttl=TTL_FEED_SEEN)
+        return seen
+
+    # ─── СОВМЕСТИМОСТЬ ──────────────────────────────────────────────────
+    async def calculate_compatibility(self, user_id_a: int, user_id_b: int) -> float:
+        """0-100%. Кэшируется на TTL_COMPAT (10 мин)."""
+        ck = key_compat(user_id_a, user_id_b)
+        cached = await cache.get(ck)
+        if cached is not None:
+            return cached
+
+        NEUTRAL = 5.0
+        try:
+            set_a, set_b = await self._get_user_tags(user_id_a), await self._get_user_tags(user_id_b)
+            tag_score = min(len(set_a & set_b) * 4, 20)
+
+            tr_a = await self._get_ocean(user_id_a)
+            tr_b = await self._get_ocean(user_id_b)
+
+            if not tr_a and not tr_b:
+                result = float(tag_score)
+            else:
+                ocean_dims = ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism']
+                ocean_score = sum(
+                    (9 - abs(float((tr_a or {}).get(d) or NEUTRAL) - float((tr_b or {}).get(d) or NEUTRAL))) / 9 * 16
+                    for d in ocean_dims
+                )
+                result = round(min(tag_score + ocean_score, 100.0), 2)
+
+            await cache.set(ck, result, ttl=TTL_COMPAT)
+            return result
+
+        except Exception as e:
+            logger.error(f"Error calculating compatibility: {e}")
+            return 0.0
+
+    # ─── КАНДИДАТЫ ──────────────────────────────────────────────────────
     async def get_candidates(
             self,
             user_id: int,
@@ -27,6 +101,12 @@ class RecommendationService:
             age_max: int = None,
             gender_filter: str = None
     ) -> List[dict]:
+        ck = key_candidates(user_id, radius_km, age_min, age_max, gender_filter)
+        cached = await cache.get(ck)
+        if cached is not None:
+            logger.debug(f"[cache HIT] candidates for user {user_id}")
+            return cached
+
         try:
             user_response = self.db.table('users').select(
                 'latitude, longitude'
@@ -37,7 +117,6 @@ class RecommendationService:
             user_lat = float(user_response.data[0]['latitude'])
             user_lon = float(user_response.data[0]['longitude'])
 
-            # Получаем всех видимых пользователей кроме себя
             all_users = self.db.table('users').select(
                 'id, age, gender, latitude, longitude, is_visible'
             ).neq('id', user_id).eq('is_visible', True).execute()
@@ -45,12 +124,6 @@ class RecommendationService:
             if not all_users.data:
                 return []
 
-            # Кого уже лайкнули (есть в liked_by у других И записи в likes)
-            # В нашей схеме "уже видели" = user_id есть в liked_by КОГО-ТО
-            # Но проще: получаем из feed.candidates уже показанных
-            # Fallback: пока просто исключаем тех, кто уже в matches
-
-            # Получаем матчи — их не показываем
             matches = self.db.table('matches').select('user1_id, user2_id').or_(
                 f'user1_id.eq.{user_id},user2_id.eq.{user_id}'
             ).execute()
@@ -60,38 +133,25 @@ class RecommendationService:
                 matched_ids.add(m['user2_id'])
             matched_ids.discard(user_id)
 
-            # Получаем тех, кто уже в нашем liked_by (мы их лайкнули)
-            # В likes: строка uid=user_id, liked_by — те кто лайкнул нас
-            # Нам нужно обратное: кого МЫ лайкнули
-            # Это хранится как: наш id есть в liked_by[candidate_id]
-            # Для фильтрации "уже свайпнутых" используем feed таблицу
-            feed_row = self.db.table('feed').select('candidates').eq('user_id', user_id).execute()
-            seen_ids = set()
-            if feed_row.data and feed_row.data[0].get('candidates'):
-                seen_ids = set(feed_row.data[0]['candidates'])
-
+            seen_ids = await self._get_seen_ids(user_id)
             exclude_ids = matched_ids | seen_ids
 
             candidates = []
             for other in all_users.data:
                 if other['id'] in exclude_ids:
                     continue
-
                 if other['latitude'] is None or other['longitude'] is None:
                     continue
-
                 distance = self.haversine_distance(
                     user_lat, user_lon,
                     float(other['latitude']), float(other['longitude'])
                 )
                 if distance > radius_km:
                     continue
-
                 if age_min and other.get('age', 0) < age_min:
                     continue
                 if age_max and other.get('age', 999) > age_max:
                     continue
-
                 if gender_filter and gender_filter != 'all':
                     if other.get('gender', '').lower() != gender_filter.lower():
                         continue
@@ -104,65 +164,24 @@ class RecommendationService:
                 })
 
             candidates.sort(key=lambda x: x['compatibility'], reverse=True)
+            await cache.set(ck, candidates, ttl=TTL_CANDIDATES)
+            logger.debug(f"[cache MISS] candidates user {user_id}: {len(candidates)} results")
             return candidates
 
         except Exception as e:
             logger.error(f"Error getting candidates: {e}")
             return []
 
-    async def calculate_compatibility(self, user_id_a: int, user_id_b: int) -> float:
+    # ─── ИНВАЛИДАЦИЯ ─────────────────────────────────────────────────────
+    @staticmethod
+    async def invalidate_user(user_id: int) -> None:
         """
-        0-100%.
-        20% — теги (4% за каждый совпадающий, макс 5)
-        80% — OCEAN из test_results (по 16% на каждое из 5 измерений)
-
-        Если у одного из пользователей нет результатов теста —
-        используем нейтральные значения (5) для недостающих данных,
-        что даёт 50% по OCEAN-части вместо полного игнорирования.
-        Если тест не прошёл никто — возвращаем только tag_score.
+        Сбрасывает все кэши пользователя.
+        Вызывай после: обновления профиля/тегов, сохранения OCEAN, свайпа.
         """
-        NEUTRAL = 5.0  # нейтральное значение на шкале 1-10
-
-        try:
-            # Теги
-            tags_a = self.db.table('user_tags').select('tags(name)').eq('user_id', user_id_a).execute()
-            tags_b = self.db.table('user_tags').select('tags(name)').eq('user_id', user_id_b).execute()
-
-            set_a = {t['tags']['name'] for t in tags_a.data if t.get('tags')} if tags_a.data else set()
-            set_b = {t['tags']['name'] for t in tags_b.data if t.get('tags')} if tags_b.data else set()
-
-            tag_score = min(len(set_a & set_b) * 4, 20)
-
-            # OCEAN из таблицы test_results
-            # Приводим id к int явно, чтобы избежать проблем с bigint/str из Supabase
-            id_a = int(user_id_a)
-            id_b = int(user_id_b)
-
-            tr_resp = self.db.table('test_results').select(
-                'user_id, openness, conscientiousness, extraversion, agreeableness, neuroticism'
-            ).in_('user_id', [id_a, id_b]).execute()
-
-            records = {int(r['user_id']): r for r in (tr_resp.data or [])}
-            tr_a = records.get(id_a)
-            tr_b = records.get(id_b)
-
-            # Если ни у кого нет теста — только теги
-            if not tr_a and not tr_b:
-                return float(tag_score)
-
-            ocean_dims = ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism']
-            ocean_score = 0.0
-
-            for dim in ocean_dims:
-                x = float((tr_a or {}).get(dim) or NEUTRAL)
-                y = float((tr_b or {}).get(dim) or NEUTRAL)
-                # Чем меньше разница — тем выше совместимость
-                # Максимальная разница на шкале 1-10 = 9
-                ocean_score += (9 - abs(x - y)) / 9 * 16
-
-            total = tag_score + ocean_score
-            return round(min(total, 100.0), 2)
-
-        except Exception as e:
-            logger.error(f"Error calculating compatibility: {e}")
-            return 0.0
+        await cache.delete(key_tags(user_id))
+        await cache.delete(key_ocean(user_id))
+        await cache.delete(key_feed_seen(user_id))
+        await cache.delete_prefix(f"candidates:{user_id}:")
+        await cache.delete_prefix(f"compat:{user_id}:")
+        logger.info(f"Cache invalidated for user {user_id}")

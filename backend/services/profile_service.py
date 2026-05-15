@@ -1,5 +1,6 @@
 from supabase import Client
 from backend.schemas.user import UserRegisterRequest, UserUpdateRequest
+from backend.cache import cache, key_tags, key_ocean, key_profile
 from datetime import datetime, date
 import logging
 
@@ -93,6 +94,10 @@ class ProfileService:
 
             user_tags = [{'user_id': user_id, 'tag_id': tag_id} for tag_id in tag_ids]
             self.db.table('user_tags').insert(user_tags).execute()
+            # Инвалидируем кэш тегов
+            await cache.delete(key_tags(user_id))
+            await cache.delete_prefix(f"compat:{user_id}:")
+            await cache.delete_prefix(f"candidates:{user_id}:")
             return True
 
         except Exception as e:
@@ -117,6 +122,10 @@ class ProfileService:
             else:
                 record['created_at'] = datetime.utcnow().isoformat()
                 response = self.db.table('test_results').insert(record).execute()
+            # Инвалидируем кэш OCEAN и совместимости
+            await cache.delete(key_ocean(user_id))
+            await cache.delete_prefix(f"compat:{user_id}:")
+            await cache.delete_prefix(f"candidates:{user_id}:")
             return response.data[0] if response.data else record
 
         except Exception as e:

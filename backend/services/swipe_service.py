@@ -4,6 +4,8 @@ import logging
 from typing import List, Dict, Optional
 import json
 
+from backend.cache import cache, key_feed_seen, key_candidates
+
 logger = logging.getLogger(__name__)
 
 
@@ -53,7 +55,8 @@ class SwipeService:
     # HELPERS
     # ------------------------------------------------------------------
     def _mark_as_seen(self, user_id: int, seen_user_id: int):
-        """Добавляем seen_user_id в feed.candidates (список просмотренных)"""
+        """Добавляем seen_user_id в feed.candidates и инвалидируем кэш"""
+        import asyncio
         try:
             feed_row = self.db.table('feed').select('candidates').eq('user_id', user_id).execute()
             if feed_row.data:
@@ -63,6 +66,14 @@ class SwipeService:
                     self.db.table('feed').update({'candidates': candidates}).eq('user_id', user_id).execute()
             else:
                 self.db.table('feed').insert({'user_id': user_id, 'candidates': [seen_user_id]}).execute()
+            # Инвалидируем кэш просмотренных и кандидатов
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    asyncio.ensure_future(cache.delete(key_feed_seen(user_id)))
+                    asyncio.ensure_future(cache.delete_prefix(f"candidates:{user_id}:"))
+            except Exception:
+                pass
         except Exception as e:
             logger.warning(f'Could not update feed seen list: {e}')
 

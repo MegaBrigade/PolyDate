@@ -61,6 +61,11 @@ app.add_middleware(
 async def health_check():
     return {"status": "ok", "service": "Dating App MVP", "version": "0.1.0"}
 
+@app.get("/cache/stats", tags=["info"])
+async def cache_stats():
+    from backend.cache import cache
+    return {"cache": cache.stats()}
+
 @app.get("/info", tags=["info"])
 async def info():
     return {
