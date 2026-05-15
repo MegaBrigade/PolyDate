@@ -537,7 +537,7 @@ img {
 
 @media (max-width: 480px) {
   .tags-grid {
-    gap: 8px;                  
+    gap: 9px;                  
   }
   .tag-item {
     font-size: 12px;         

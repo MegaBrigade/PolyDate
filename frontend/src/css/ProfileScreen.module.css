@@ -349,7 +349,7 @@
   width: fit-content;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 500px) {
   .indicators {
     top: 8px;
     left: 8px;
