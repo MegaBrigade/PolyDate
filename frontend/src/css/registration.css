@@ -544,3 +544,39 @@ img {
     padding: 6px 8px;          
   }
 }
+
+.tags-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+@media (max-width: 480px) {
+    .tags-grid {
+        gap: 8px;
+        margin: 16px 0;
+    }
+    .tag-item {
+        font-size: 11px;
+        padding: 6px 8px;
+        white-space: normal;      
+        word-break: break-word;    
+        text-align: center;
+    }
+}
+
+.registration-screen-tags .panel {
+    padding: clamp(30px, 5vw, 70px);
+    overflow-x: hidden;
+}
+
+@media (max-width: 480px) {
+    .panel {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+}
