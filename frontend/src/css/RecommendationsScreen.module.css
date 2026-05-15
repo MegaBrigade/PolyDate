@@ -279,6 +279,7 @@
   .card {
     aspect-ratio: 2 / 3;      
     max-height: calc(100vh - 90px);
-    margin-bottom: 0;             
+    margin-bottom: 0;  
+    margin-top: 30px;            
   }
 }
