@@ -149,3 +149,13 @@ function DevLogin({ onLogin }) {
     </div>
   );
 }
+
+// import React from 'react';
+// import RegistrationWizard from './RegistrationWizard';
+
+// function App() {
+//   // Передаём заглушку для telegramId (для вёрстки не важно)
+//   return <RegistrationWizard onComplete={() => console.log('completed')} telegramId={123456} />;
+// }
+
+// export default App;
