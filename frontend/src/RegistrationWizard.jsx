@@ -218,8 +218,8 @@ export default function RegistrationWizard({ onComplete, telegramId }) {
         <img src="/assets/geolocation.svg" alt="иконка геолокации" className="geo-icon" />
         <div className="title-container">
           <img src="/assets/heart-left.svg" alt="сердце" className="heart heart-left" />
-          <h2 className="text-title-frame">Найдем партнеров <br />поблизости</h2>
-          <img src="/assets/heart-right.svg" alt="сердце" className="heart heart-right" />
+          <h2 className="text-title-frame">Найдем <br />партнеров рядом</h2>
+          <img src="/assets/heart-right.svg" alt="сердце" className="heart heart-right" style={{ transform: 'translateY(30px)' }} />
         </div>
         <p className="main-text">Разрешите доступ к геолокации — ведь настоящие чувства часто начинаются совсем рядом</p>
         <button className="next-btn" onClick={nextStep}>Далее</button>
