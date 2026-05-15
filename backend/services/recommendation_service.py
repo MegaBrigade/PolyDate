@@ -1,7 +1,7 @@
 from supabase import Client
 from math import radians, cos, sin, asin, sqrt
 import logging
-from typing import List
+from typing import List, Optional
 
 from backend.cache import (
     cache,
@@ -104,24 +104,41 @@ class RecommendationService:
         ck = key_candidates(user_id, radius_km, age_min, age_max, gender_filter)
         cached = await cache.get(ck)
         if cached is not None:
-            logger.debug(f"[cache HIT] candidates for user {user_id}")
-            return cached
+            # ФИХ #4: не возвращаем закэшированный пустой список —
+            # пустой результат мог быть следствием бага с координатами.
+            if len(cached) > 0:
+                logger.debug(f"[cache HIT] candidates for user {user_id}")
+                return cached
+            logger.debug(f"[cache HIT empty] candidates for user {user_id} — re-fetching")
 
         try:
             user_response = self.db.table('users').select(
                 'latitude, longitude'
             ).eq('id', user_id).execute()
             if not user_response.data:
+                logger.warning(f"User {user_id} not found in DB")
                 return []
 
-            user_lat = float(user_response.data[0]['latitude'])
-            user_lon = float(user_response.data[0]['longitude'])
+            # ФИХ #1: защита от NULL координат у текущего пользователя.
+            # Если координаты не заданы — показываем анкеты без фильтра по расстоянию.
+            raw_lat = user_response.data[0].get('latitude')
+            raw_lon = user_response.data[0].get('longitude')
+            has_location = raw_lat is not None and raw_lon is not None
+            if not has_location:
+                logger.warning(
+                    f"User {user_id} has no coordinates — distance filter disabled"
+                )
+            user_lat = float(raw_lat) if has_location else None
+            user_lon = float(raw_lon) if has_location else None
 
+            # ФИХ #2: is_visible = NULL тоже пропускаем (как "видимый"),
+            # фильтруем только явно выключенных (is_visible = false).
             all_users = self.db.table('users').select(
                 'id, age, gender, latitude, longitude, is_visible'
-            ).neq('id', user_id).eq('is_visible', True).execute()
+            ).neq('id', user_id).or_('is_visible.eq.true,is_visible.is.null').execute()
 
             if not all_users.data:
+                logger.warning("No other visible users found in DB")
                 return []
 
             matches = self.db.table('matches').select('user1_id, user2_id').or_(
@@ -140,20 +157,28 @@ class RecommendationService:
             for other in all_users.data:
                 if other['id'] in exclude_ids:
                     continue
-                if other['latitude'] is None or other['longitude'] is None:
+
+                # Расстояние: если у нас нет координат — пропускаем проверку.
+                # Если у кандидата нет координат — тоже пропускаем кандидата.
+                if has_location:
+                    if other['latitude'] is None or other['longitude'] is None:
+                        continue
+                    distance = self.haversine_distance(
+                        user_lat, user_lon,
+                        float(other['latitude']), float(other['longitude'])
+                    )
+                    if distance > radius_km:
+                        continue
+                else:
+                    # координат нет — расстояние неизвестно, ставим 0
+                    distance = 0.0
+
+                if age_min and other.get('age') is not None and other['age'] < age_min:
                     continue
-                distance = self.haversine_distance(
-                    user_lat, user_lon,
-                    float(other['latitude']), float(other['longitude'])
-                )
-                if distance > radius_km:
-                    continue
-                if age_min and other.get('age', 0) < age_min:
-                    continue
-                if age_max and other.get('age', 999) > age_max:
+                if age_max and other.get('age') is not None and other['age'] > age_max:
                     continue
                 if gender_filter and gender_filter != 'all':
-                    if other.get('gender', '').lower() != gender_filter.lower():
+                    if (other.get('gender') or '').lower() != gender_filter.lower():
                         continue
 
                 compatibility = await self.calculate_compatibility(user_id, other['id'])
@@ -164,12 +189,16 @@ class RecommendationService:
                 })
 
             candidates.sort(key=lambda x: x['compatibility'], reverse=True)
-            await cache.set(ck, candidates, ttl=TTL_CANDIDATES)
+
+            # ФИХ #4: кэшируем только непустые результаты,
+            # чтобы не фиксировать [] из-за временных проблем.
+            if candidates:
+                await cache.set(ck, candidates, ttl=TTL_CANDIDATES)
             logger.debug(f"[cache MISS] candidates user {user_id}: {len(candidates)} results")
             return candidates
 
         except Exception as e:
-            logger.error(f"Error getting candidates: {e}")
+            logger.error(f"Error getting candidates for user {user_id}: {e}", exc_info=True)
             return []
 
     # ─── ИНВАЛИДАЦИЯ ─────────────────────────────────────────────────────
