@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     SUPABASE_URL: str = os.getenv("SUPABASE_URL")
     SUPABASE_KEY: str = os.getenv("SUPABASE_KEY")
     SUPABASE_DB_PASSWORD: str = os.getenv("SUPABASE_DB_PASSWORD")
+    REDIS_URL: str = os.getenv("REDIS_URL")
 
     SIGHTENGINE_API_KEY: str = os.getenv("SIGHTENGINE_API_KEY")
     TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN")

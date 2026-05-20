@@ -1,7 +1,4 @@
 """
-Простой in-memory кэш для PolyDate.
-Не требует Redis — всё хранится в памяти процесса.
-
 Использование:
     from backend.cache import cache
 
@@ -18,62 +15,84 @@
     await cache.delete_prefix("user:123")
 """
 
-import asyncio
 import time
+import json
 import logging
 from typing import Any, Optional
+import redis.asyncio as redis
+from backend.config import get_settings
 
 logger = logging.getLogger(__name__)
 
 
-class MemoryCache:
-    """Thread-safe async in-memory кэш с TTL."""
-
+class RedisCache:
     def __init__(self):
-        self._store: dict[str, tuple[Any, float]] = {}  # key -> (value, expires_at)
-        self._lock = asyncio.Lock()
+        self._redis: Optional[redis.Redis] = None
+        self._url = get_settings().REDIS_URL
+
+    async def _get_redis(self) -> redis.Redis:
+        if self._redis is None:
+            self._redis = await redis.from_url(
+                self._url, decode_responses=True, max_connections=20
+            )
+        return self._redis
 
     async def get(self, key: str) -> Optional[Any]:
-        async with self._lock:
-            entry = self._store.get(key)
-            if entry is None:
-                return None
-            value, expires_at = entry
-            if time.monotonic() > expires_at:
-                del self._store[key]
-                return None
-            return value
+        r = await self._get_redis()
+        data = await r.get(key)
+        if data is None:
+            return None
+        try:
+            return json.loads(data)
+        except Exception as e:
+            logger.warning(f"Failed to decode JSON for key {key}: {e}")
+            return None
 
     async def set(self, key: str, value: Any, ttl: int = 60) -> None:
-        async with self._lock:
-            self._store[key] = (value, time.monotonic() + ttl)
+        if value is None:
+            await self.delete(key)
+            return
+        r = await self._get_redis()
+        try:
+            serialized = json.dumps(value, ensure_ascii=False)
+            await r.setex(key, ttl, serialized)
+        except Exception as e:
+            logger.error(f"Redis set error: {e}")
 
     async def delete(self, key: str) -> None:
-        async with self._lock:
-            self._store.pop(key, None)
+        r = await self._get_redis()
+        await r.delete(key)
 
     async def delete_prefix(self, prefix: str) -> int:
         """Удаляет все ключи, начинающиеся с prefix. Возвращает кол-во удалённых."""
-        async with self._lock:
-            keys_to_delete = [k for k in self._store if k.startswith(prefix)]
-            for k in keys_to_delete:
-                del self._store[k]
-            return len(keys_to_delete)
+        r = await self._get_redis()
+        deleted = 0
+        async for key in r.scan_iter(match=f"{prefix}*", count=100):
+            await r.delete(key)
+            deleted += 1
+        return deleted
 
     async def clear(self) -> None:
-        async with self._lock:
-            self._store.clear()
+        """Очистка всей БД Redis (осторожно!). Для продакшена лучше не использовать."""
+        r = await self._get_redis()
+        await r.flushdb()
+
+    async def close(self) -> None:
+        """Закрыть соединение с Redis. Вызывать при завершении приложения."""
+        if self._redis is not None:
+            await self._redis.close()
+            self._redis = None
 
     def stats(self) -> dict:
-        now = time.monotonic()
-        total = len(self._store)
-        alive = sum(1 for _, (_, exp) in self._store.items() if exp > now)
-        return {"total_keys": total, "alive_keys": alive, "expired_keys": total - alive}
+        """Возвращает примерную статистику размера кэша (только для мониторинга)."""
+        # Простая заглушка, т.к. точная статистика по префиксам требует отдельного подхода
+        return {
+            "type": "redis",
+            "info": "Use redis-cli INFO keyspace for details"
+        }
 
 
-# Глобальный экземпляр — импортируй везде
-cache = MemoryCache()
-
+cache = RedisCache()
 
 # ── TTL константы ────────────────────────────────────────────
 TTL_CANDIDATES   = 5 * 60    # 5 мин  — лента кандидатов
