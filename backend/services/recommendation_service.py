@@ -29,10 +29,12 @@ class RecommendationService:
     async def _get_user_tags(self, user_id: int) -> set:
         cached = await cache.get(key_tags(user_id))
         if cached is not None:
-            return cached
+            # из кэша приходит list, превращаем в set
+            return set(cached)
         resp = self.db.table('user_tags').select('tags(name)').eq('user_id', user_id).execute()
         tags = {t['tags']['name'] for t in resp.data if t.get('tags')} if resp.data else set()
-        await cache.set(key_tags(user_id), tags, ttl=TTL_TAGS)
+        # сохраняем list вместо set
+        await cache.set(key_tags(user_id), list(tags), ttl=TTL_TAGS)
         return tags
 
     # ─── OCEAN ──────────────────────────────────────────────────────────
@@ -51,12 +53,12 @@ class RecommendationService:
     async def _get_seen_ids(self, user_id: int) -> set:
         cached = await cache.get(key_feed_seen(user_id))
         if cached is not None:
-            return cached
+            return set(cached)
         feed_row = self.db.table('feed').select('candidates').eq('user_id', user_id).execute()
         seen = set()
         if feed_row.data and feed_row.data[0].get('candidates'):
             seen = set(feed_row.data[0]['candidates'])
-        await cache.set(key_feed_seen(user_id), seen, ttl=TTL_FEED_SEEN)
+        await cache.set(key_feed_seen(user_id), list(seen), ttl=TTL_FEED_SEEN)
         return seen
 
     # ─── СОВМЕСТИМОСТЬ ──────────────────────────────────────────────────

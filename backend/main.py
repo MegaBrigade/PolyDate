@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 import logging
 import sys
 import os
+from backend.cache import cache
 
 # Configure logging
 logging.basicConfig(
@@ -33,6 +34,10 @@ async def lifespan(app: FastAPI):
     logger.info("=" * 50)
     yield
     logger.info("🛑 Dating App MVP Shutting down...")
+    try:
+        await cache.close()
+    except Exception as e:
+        logger.warning(f"Error closing cache: {e}")
 
 
 # Create FastAPI backend with lifespan
