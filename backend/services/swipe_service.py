@@ -145,23 +145,30 @@ class SwipeService:
     # DISLIKE
     # ------------------------------------------------------------------
     async def dislike_user(self, user_id: int, disliked_user_id: int) -> Dict:
-        """Dislike via stored procedure (atomic delete+insert)."""
+        """Дизлайк — записываем action=dislike в таблицу likes и удаляем user_id из liked_by цели"""
         try:
-            # Вызываем хранимую функцию
-            result = self.db.rpc('record_dislike', {
-                'p_user_id': user_id,
-                'p_disliked_user_id': disliked_user_id
+            self.db.table("likes").insert({
+                "user_id": user_id,
+                "liked_user_id": disliked_user_id,
+                "action": "dislike",
             }).execute()
-            logger.info(f"Dislike recorded: {user_id} → {disliked_user_id}")
-
-            # Отмечаем в feed
-            self._mark_as_seen(user_id, disliked_user_id)
-
-            return {'success': True}
-
+            logger.info(f"Dislike: {user_id} → {disliked_user_id}")
         except Exception as e:
-            logger.error(f"❌ Error in dislike_user: {e}")
-            raise
+            logger.warning(f"Could not record dislike: {e}")
+        try:
+            target_row = self.db.table('users').select('liked_by').eq('id', disliked_user_id).execute()
+            if target_row.data:
+                liked_by = target_row.data[0].get('liked_by') or []
+                liked_by_ids = self._extract_ids_from_jsonb_array(liked_by)
+                if user_id in liked_by_ids:
+                    liked_by_ids.remove(user_id)
+                    self.db.table('users').update({'liked_by': liked_by_ids}).eq('id', disliked_user_id).execute()
+                    logger.info(f"Removed {user_id} from liked_by of {disliked_user_id}")
+        except Exception as e:
+            logger.warning(f"Could not remove from liked_by on dislike: {e}")
+
+        self._mark_as_seen(user_id, disliked_user_id)
+        return {"success": True}
     
     # ------------------------------------------------------------------
     # КТО ЛАЙКНУЛ МЕНЯ
